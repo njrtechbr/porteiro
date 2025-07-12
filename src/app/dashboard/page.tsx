@@ -45,7 +45,7 @@ function UserAccessList({ title, users, icon: Icon }: { title: string; users: Us
 
 export default function DashboardPage() {
   const users = getUsers();
-  const currentUser = users.find(u => u.role === 'Hóspede'); // Assuming the logged in user is a guest for demo
+  const currentUser = users.find(u => u.role === 'Hóspede'); 
 
   const now = new Date();
   const activeUsers = users.filter(u => 
