@@ -5,9 +5,8 @@ import type { User } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { format, isFuture, isPast } from "date-fns";
-import { KeyRound, Users, CalendarClock } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { KeyRound, CalendarClock } from "lucide-react";
+import { GuestInviteCard } from "@/components/guest-invite-card";
 
 function UserAccessList({ title, users, icon: Icon }: { title: string; users: User[]; icon: React.ElementType }) {
   return (
@@ -43,33 +42,6 @@ function UserAccessList({ title, users, icon: Icon }: { title: string; users: Us
     </Card>
   )
 }
-
-function GuestInviteCard({ invites }: { invites?: number }) {
-  if (invites === undefined) return null; // Or show something else for non-guests
-
-  const inviteLink = "https://porteiro.app/convite/a1b2c3d4";
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-headline text-xl">Seus Convites para Hóspedes</CardTitle>
-        <CardDescription>Compartilhe este link para convidar outras pessoas. Elas terão acesso durante a sua estadia.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <p className="text-sm font-medium">Você tem <span className="text-primary font-bold">{invites}</span> convites restantes.</p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Input id="invite-link" value={inviteLink} readOnly />
-          <Button variant="outline" size="icon" onClick={() => navigator.clipboard.writeText(inviteLink)}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
 
 export default function DashboardPage() {
   const users = getUsers();
