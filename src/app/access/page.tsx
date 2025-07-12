@@ -33,27 +33,74 @@ export default function AccessPage() {
     setLoading(false);
   }, []);
 
-  const handleGateAction = (gate: Gate, gateDetails: GateDetails) => {
+  const getLocation = (): Promise<{ latitude: number; longitude: number }> => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        return reject(new Error('Geolocalização não é suportada pelo seu navegador.'));
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+           switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    reject(new Error("Você negou a permissão de localização."));
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    reject(new Error("As informações de localização não estão disponíveis."));
+                    break;
+                case error.TIMEOUT:
+                    reject(new Error("A solicitação de localização expirou."));
+                    break;
+                default:
+                    reject(new Error("Ocorreu um erro desconhecido ao obter a localização."));
+                    break;
+            }
+        }
+      );
+    });
+  };
+
+  const handleGateAction = async (gate: Gate, gateDetails: GateDetails) => {
     if (!user) return;
     setLoadingGate(gate);
 
-    setTimeout(() => {
-      const newLog: AccessLog = {
-        id: `log${Date.now()}`,
-        user: { id: user.id, name: user.name, avatar: user.avatar },
-        action: 'Portão Aberto',
-        timestamp: new Date(),
-        details: `Acionamento via App (${gateDetails.name})`,
-      };
+    try {
+      const location = await getLocation();
+      const locationString = `GPS: ${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`;
       
-      setUserLogs(prevLogs => [newLog, ...prevLogs]);
-      setLoadingGate(null);
+      // Simulate network delay for gate action
+      setTimeout(() => {
+        const newLog: AccessLog = {
+          id: `log${Date.now()}`,
+          user: { id: user.id, name: user.name, avatar: user.avatar },
+          action: 'Portão Aberto',
+          timestamp: new Date(),
+          details: `Acionamento via App (${gateDetails.name}) - ${locationString}`,
+        };
+        
+        setUserLogs(prevLogs => [newLog, ...prevLogs]);
+        
+        toast({
+          title: 'Portão Acionado',
+          description: `O portão da ${gateDetails.name} foi acionado com sucesso.`,
+        });
+        setLoadingGate(null);
+      }, 1000);
 
-      toast({
-        title: 'Portão Acionado',
-        description: `O portão da ${gateDetails.name} foi acionado com sucesso.`,
+    } catch (error) {
+       toast({
+        variant: 'destructive',
+        title: 'Falha na Localização',
+        description: (error as Error).message || 'Não foi possível obter a sua localização para acionar o portão.',
       });
-    }, 1500);
+      setLoadingGate(null);
+    }
   };
   
   const handleLogout = () => {

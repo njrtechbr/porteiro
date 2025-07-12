@@ -6,12 +6,38 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { AccessLog } from '@/lib/types';
 import { ScrollArea } from './ui/scroll-area';
+import { Globe } from 'lucide-react';
 
 interface AccessHistoryProps {
     logs: AccessLog[];
 }
 
 export function AccessHistory({ logs }: AccessHistoryProps) {
+  const renderDetails = (details: string) => {
+    const parts = details.split(' - GPS: ');
+    const description = parts[0];
+    const gps = parts[1];
+    const googleMapsLink = gps ? `https://www.google.com/maps?q=${gps}` : null;
+
+    return (
+      <>
+        <p>{description}</p>
+        {googleMapsLink && (
+          <a 
+            href={googleMapsLink} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-xs text-primary hover:underline flex items-center gap-1 mt-1"
+          >
+            <Globe className="h-3 w-3" />
+            Ver no mapa
+          </a>
+        )}
+      </>
+    );
+  };
+
+
   return (
     <Card>
       <CardHeader>
@@ -33,7 +59,7 @@ export function AccessHistory({ logs }: AccessHistoryProps) {
                   <TableRow key={log.id}>
                     <TableCell>
                       <p className="font-medium">{log.action}</p>
-                      <p className="text-sm text-muted-foreground">{log.details}</p>
+                      <div className="text-sm text-muted-foreground">{renderDetails(log.details)}</div>
                     </TableCell>
                     <TableCell className="text-right text-muted-foreground whitespace-nowrap">
                       {format(log.timestamp, 'd MMM, HH:mm', { locale: ptBR })}

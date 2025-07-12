@@ -93,7 +93,7 @@ const logs: AccessLog[] = [
     user: users[1],
     action: 'Portão Aberto',
     timestamp: subDays(now, 1),
-    details: 'Abertura remota via aplicativo (Portão Nicarágua)',
+    details: 'Acionamento via App (Av. Nicarágua) - GPS: -23.5505, -46.6333',
   },
   {
     id: 'log2',
@@ -107,7 +107,7 @@ const logs: AccessLog[] = [
     user: users[2],
     action: 'Portão Aberto',
     timestamp: subDays(now, 3),
-    details: 'Abertura remota via aplicativo (Portão Nicarágua)',
+    details: 'Acionamento via App (Av. Nicarágua) - GPS: -23.5505, -46.6333',
   },
     {
     id: 'log4',
@@ -135,7 +135,7 @@ const logs: AccessLog[] = [
     user: users[3],
     action: 'Portão Aberto',
     timestamp: subDays(now, 1),
-    details: 'Abertura remota via aplicativo (Portão Bélgica)',
+    details: 'Acionamento via App (Av. Bélgica) - GPS: -23.5505, -46.6333',
   }
 ];
 
