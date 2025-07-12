@@ -23,8 +23,8 @@ export type User = {
   accessibleGates: Gate[];
 };
 
-export type UserCreation = Omit<User, 'id' | 'avatar'>;
-export type UserUpdate = Partial<Omit<User, 'id' | 'avatar' | 'cpf' | 'status'>>;
+export type UserCreation = Omit<User, 'id' | 'avatar' | 'status'>;
+export type UserUpdate = Partial<Omit<User, 'id' | 'avatar' | 'cpf'>>;
 
 
 export type AccessLog = {

@@ -50,10 +50,16 @@ export async function updateUser(userId: string, data: UserUpdate): Promise<User
   const originalUser = users[userIndex];
   
   // Create a new object for the updated user to avoid direct mutation issues
-  const updatedUser = { 
+  const updatedUser: User = { 
     ...originalUser, 
     ...data 
   };
+  
+  // If accessStart is explicitly null, it means permanent access.
+  if (data.accessStart === null) {
+      updatedUser.accessStart = null;
+      updatedUser.accessEnd = null;
+  }
   
   users[userIndex] = updatedUser;
   
