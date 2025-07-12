@@ -24,7 +24,7 @@ export type User = {
 };
 
 export type UserCreation = Omit<User, 'id' | 'avatar'>;
-export type UserUpdate = Partial<Omit<User, 'id' | 'avatar' | 'cpf'>>;
+export type UserUpdate = Partial<Omit<User, 'id' | 'avatar' | 'cpf' | 'status'>>;
 
 
 export type AccessLog = {

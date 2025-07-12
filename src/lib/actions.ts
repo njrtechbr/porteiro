@@ -27,13 +27,14 @@ export async function addUser(userData: UserCreation): Promise<User | null> {
     id: `user${Date.now()}`,
     ...userData,
     avatar: 'https://placehold.co/100x100.png', // Default avatar
+    status: 'pendente',
   };
   users.push(newUser);
 
   await addLogEntry({
-    userId: newUser.id,
-    action: 'Usuário Registrado',
-    details: `Acesso pendente para ${newUser.name}.`,
+    userId: '1', // Admin user ID
+    action: 'Usuário Adicionado',
+    details: `Acesso de ${newUser.name} foi criado com status pendente.`,
   });
 
 
@@ -47,7 +48,13 @@ export async function updateUser(userId: string, data: UserUpdate): Promise<User
   if (userIndex === -1) return null;
 
   const originalUser = users[userIndex];
-  const updatedUser = { ...originalUser, ...data };
+  
+  // Create a new object for the updated user to avoid direct mutation issues
+  const updatedUser = { 
+    ...originalUser, 
+    ...data 
+  };
+  
   users[userIndex] = updatedUser;
   
   await addLogEntry({

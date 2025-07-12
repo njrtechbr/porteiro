@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import type { User, UserUpdate } from '@/lib/types';
+import type { User, UserUpdate, Gate } from '@/lib/types';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarIcon, RefreshCw, Loader2 } from 'lucide-react';
@@ -34,6 +34,13 @@ interface EditUserDialogProps {
 export function EditUserDialog({ isOpen, setIsOpen, user, onSave }: EditUserDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<UserUpdate>({});
+  
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: user?.accessStart || undefined,
+    to: user?.accessEnd || undefined,
+  });
+  const [isPermanent, setIsPermanent] = useState(!user?.accessStart && !user?.accessEnd);
+  const [accessibleGates, setAccessibleGates] = useState<Gate[]>(user?.accessibleGates || []);
 
   useEffect(() => {
     if (user) {
@@ -45,16 +52,14 @@ export function EditUserDialog({ isOpen, setIsOpen, user, onSave }: EditUserDial
         accessEnd: user.accessEnd,
         accessCode: user.accessCode,
         invites: user.invites,
+        accessibleGates: user.accessibleGates,
       });
+      setDate({ from: user.accessStart || undefined, to: user.accessEnd || undefined });
       setIsPermanent(!user.accessStart && !user.accessEnd);
+      setAccessibleGates(user.accessibleGates || []);
     }
   }, [user]);
 
-  const [date, setDate] = useState<DateRange | undefined>({
-    from: user.accessStart || undefined,
-    to: user.accessEnd || undefined,
-  });
-  const [isPermanent, setIsPermanent] = useState(!user.accessStart && !user.accessEnd);
 
   const generateNewAccessCode = () => {
     const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -72,9 +77,10 @@ export function EditUserDialog({ isOpen, setIsOpen, user, onSave }: EditUserDial
       setFormData(prev => ({ ...prev, accessStart: null, accessEnd: null }));
     } else {
         const today = new Date();
-        const nextWeek = new Date(today.setDate(today.getDate() + 7));
-        setDate({ from: new Date(), to: nextWeek });
-        setFormData(prev => ({...prev, accessStart: new Date(), accessEnd: nextWeek}));
+        const nextWeek = new Date(new Date().setDate(today.getDate() + 7));
+        const newDateRange = { from: today, to: nextWeek };
+        setDate(newDateRange);
+        setFormData(prev => ({...prev, accessStart: newDateRange.from, accessEnd: newDateRange.to}));
     }
   };
   
@@ -90,6 +96,12 @@ export function EditUserDialog({ isOpen, setIsOpen, user, onSave }: EditUserDial
 
   const handleRoleChange = (value: User['role']) => {
     setFormData(prev => ({...prev, role: value}));
+  }
+
+  const handleGateChange = (gate: Gate, checked: boolean) => {
+    const newGates = checked ? [...accessibleGates, gate] : accessibleGates.filter(g => g !== gate);
+    setAccessibleGates(newGates);
+    setFormData(prev => ({ ...prev, accessibleGates: newGates }));
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -192,6 +204,27 @@ export function EditUserDialog({ isOpen, setIsOpen, user, onSave }: EditUserDial
                 <Label htmlFor="permanent" className="font-normal">Acesso Permanente</Label>
               </div>
             </div>
+             <div className="grid grid-cols-4 items-start gap-4">
+                <Label className="text-right pt-2">Portões</Label>
+                <div className="col-span-3 space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="edit-gate-nicaragua" 
+                      checked={accessibleGates.includes('nicaragua')}
+                      onCheckedChange={(checked) => handleGateChange('nicaragua', !!checked)}
+                    />
+                    <Label htmlFor="edit-gate-nicaragua" className="font-normal">Av. Nicarágua</Label>
+                  </div>
+                    <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="edit-gate-belgica"
+                      checked={accessibleGates.includes('belgica')} 
+                      onCheckedChange={(checked) => handleGateChange('belgica', !!checked)}
+                    />
+                    <Label htmlFor="edit-gate-belgica" className="font-normal">Av. Bélgica</Label>
+                  </div>
+                </div>
+              </div>
             <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="accessCode" className="text-right">
                     Cód. Acesso
