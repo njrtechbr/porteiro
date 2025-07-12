@@ -14,6 +14,7 @@ const users: User[] = [
     accessEnd: null,
     avatar: 'https://placehold.co/100x100/34A049/ffffff.png?text=A',
     status: 'ativo',
+    accessibleGates: ['nicaragua', 'belgica'],
   },
   {
     id: '2',
@@ -26,6 +27,7 @@ const users: User[] = [
     invites: 3,
     avatar: 'https://placehold.co/100x100.png',
     status: 'ativo',
+    accessibleGates: ['nicaragua', 'belgica'],
   },
   {
     id: '3',
@@ -37,6 +39,7 @@ const users: User[] = [
     accessEnd: null,
     avatar: 'https://placehold.co/100x100.png',
     status: 'ativo',
+    accessibleGates: ['nicaragua'],
   },
   {
     id: '4',
@@ -48,6 +51,7 @@ const users: User[] = [
     accessEnd: addDays(now, 5),
     avatar: 'https://placehold.co/100x100.png',
     status: 'ativo',
+    accessibleGates: ['belgica'],
   },
   {
     id: '5',
@@ -59,6 +63,7 @@ const users: User[] = [
     invites: 5,
     avatar: 'https://placehold.co/100x100.png',
     status: 'pendente',
+    accessibleGates: ['nicaragua', 'belgica'],
   },
   {
     id: '6',
@@ -70,6 +75,7 @@ const users: User[] = [
     invites: 0,
     avatar: 'https://placehold.co/100x100.png',
     status: 'expirado',
+    accessibleGates: [],
   },
 ];
 
@@ -79,7 +85,7 @@ const logs: AccessLog[] = [
     user: users[1],
     action: 'Portão Aberto',
     timestamp: subDays(now, 1),
-    details: 'Abertura remota via aplicativo',
+    details: 'Abertura remota via aplicativo (Portão Nicarágua)',
   },
   {
     id: 'log2',
@@ -93,7 +99,7 @@ const logs: AccessLog[] = [
     user: users[2],
     action: 'Portão Aberto',
     timestamp: subDays(now, 3),
-    details: 'Abertura remota via aplicativo',
+    details: 'Abertura remota via aplicativo (Portão Nicarágua)',
   },
     {
     id: 'log4',

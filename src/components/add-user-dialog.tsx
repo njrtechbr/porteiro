@@ -23,14 +23,24 @@ import { cn } from '@/lib/utils';
 import type { DateRange } from 'react-day-picker';
 import { Textarea } from './ui/textarea';
 import { toast } from '@/hooks/use-toast';
+import { Checkbox } from './ui/checkbox';
+import type { Gate } from '@/lib/types';
 
 export function AddUserDialog() {
   const [date, setDate] = useState<DateRange | undefined>();
   const [accessGranted, setAccessGranted] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', invites: '1' });
   const [accessCode, setAccessCode] = useState('');
+  const [accessibleGates, setAccessibleGates] = useState<Gate[]>([]);
   
   const registrationLink = "https://porteiro.app/register?code=" + accessCode;
+
+  const getGateNames = () => {
+    if (accessibleGates.length === 2) return "Portões Av. Nicarágua e Av. Bélgica";
+    if (accessibleGates.includes('nicaragua')) return "Portão Av. Nicarágua";
+    if (accessibleGates.includes('belgica')) return "Portão Av. Bélgica";
+    return "Nenhum portão";
+  }
 
   const whatsappMessage = `Olá ${formData.name},
 
@@ -40,6 +50,7 @@ Para garantir sua entrada, por favor, complete seu cadastro no link abaixo:
 ${registrationLink}
 
 Seu código de acesso para os portões é: ${accessCode}
+Portões liberados: ${getGateNames()}
 
 O seu acesso estará válido de ${date?.from ? format(date.from, 'dd/MM/yyyy') : ''} até ${date?.to ? format(date.to, 'dd/MM/yyyy') : ''}.
 
@@ -52,14 +63,14 @@ Qualquer dúvida, estamos à disposição!`;
     const email = (form.elements.namedItem('email') as HTMLInputElement).value;
     const invites = (form.elements.namedItem('invites') as HTMLInputElement).value;
 
-    if (name && email && invites && date?.from && date?.to) {
+    if (name && email && invites && date?.from && date?.to && accessibleGates.length > 0) {
         setFormData({ name, email, invites });
         setAccessGranted(true);
     } else {
         toast({
             variant: "destructive",
             title: "Erro de Validação",
-            description: "Por favor, preencha todos os campos e selecione um período de acesso.",
+            description: "Por favor, preencha todos os campos, selecione um período e ao menos um portão de acesso.",
         })
     }
   };
@@ -76,11 +87,18 @@ Qualquer dúvida, estamos à disposição!`;
     return Math.random().toString(36).substring(2, 8).toUpperCase();
   }
 
+  const handleGateChange = (gate: Gate, checked: boolean) => {
+    setAccessibleGates(prev => 
+      checked ? [...prev, gate] : prev.filter(g => g !== gate)
+    );
+  }
+
   const resetState = () => {
     setAccessGranted(false);
     setFormData({ name: '', email: '', invites: '1' });
     setDate(undefined);
     setAccessCode('');
+    setAccessibleGates([]);
   }
 
   const handleOpenChange = (open: boolean) => {
@@ -172,6 +190,25 @@ Qualquer dúvida, estamos à disposição!`;
                         />
                     </PopoverContent>
                     </Popover>
+                </div>
+                <div className="grid grid-cols-4 items-start gap-4">
+                  <Label className="text-right pt-2">Portões</Label>
+                  <div className="col-span-3 space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="gate-nicaragua" 
+                        onCheckedChange={(checked) => handleGateChange('nicaragua', !!checked)}
+                      />
+                      <Label htmlFor="gate-nicaragua" className="font-normal">Av. Nicarágua</Label>
+                    </div>
+                     <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="gate-belgica" 
+                        onCheckedChange={(checked) => handleGateChange('belgica', !!checked)}
+                      />
+                      <Label htmlFor="gate-belgica" className="font-normal">Av. Bélgica</Label>
+                    </div>
+                  </div>
                 </div>
               </div>
             </form>

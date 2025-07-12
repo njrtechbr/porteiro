@@ -1,3 +1,5 @@
+export type Gate = 'nicaragua' | 'belgica';
+
 export type User = {
   id: string;
   name: string;
@@ -9,6 +11,7 @@ export type User = {
   invites?: number;
   avatar: string;
   status: 'ativo' | 'pendente' | 'expirado';
+  accessibleGates?: Gate[];
 };
 
 export type AccessLog = {
