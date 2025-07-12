@@ -10,6 +10,7 @@ import { AccessGateControl } from '@/components/access-gate-control';
 import { AccessHistory } from '@/components/access-history';
 import { UserHeader } from '@/components/user-header';
 import { toast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 export default function AccessPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -17,6 +18,7 @@ export default function AccessPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [loadingGate, setLoadingGate] = useState<Gate | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   useEffect(() => {
     // Development bypass: Automatically log in as a default user
@@ -34,9 +36,12 @@ export default function AccessPage() {
   }, []);
 
   const getLocation = (): Promise<{ latitude: number; longitude: number }> => {
+    setLocationError(null);
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        return reject(new Error('Geolocalização não é suportada pelo seu navegador.'));
+        const errorMessage = 'Geolocalização não é suportada pelo seu navegador.';
+        setLocationError(errorMessage);
+        return reject(new Error(errorMessage));
       }
 
       navigator.geolocation.getCurrentPosition(
@@ -47,20 +52,20 @@ export default function AccessPage() {
           });
         },
         (error) => {
+           let errorMessage = "Ocorreu um erro desconhecido ao obter a localização.";
            switch(error.code) {
                 case error.PERMISSION_DENIED:
-                    reject(new Error("Você negou a permissão de localização."));
+                    errorMessage = "Você negou a permissão de localização. Habilite-a para continuar.";
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    reject(new Error("As informações de localização não estão disponíveis."));
+                    errorMessage = "As informações de localização não estão disponíveis.";
                     break;
                 case error.TIMEOUT:
-                    reject(new Error("A solicitação de localização expirou."));
-                    break;
-                default:
-                    reject(new Error("Ocorreu um erro desconhecido ao obter a localização."));
+                    errorMessage = "A solicitação de localização expirou.";
                     break;
             }
+            setLocationError(errorMessage);
+            reject(new Error(errorMessage));
         }
       );
     });
@@ -69,6 +74,7 @@ export default function AccessPage() {
   const handleGateAction = async (gate: Gate, gateDetails: GateDetails) => {
     if (!user) return;
     setLoadingGate(gate);
+    setLocationError(null);
 
     try {
       const location = await getLocation();
@@ -102,6 +108,13 @@ export default function AccessPage() {
       setLoadingGate(null);
     }
   };
+
+  const handleRetryLocation = () => {
+    getLocation().catch(err => {
+        // Error is already handled inside getLocation and toast, just need to catch the promise rejection
+        console.error("Tentativa de localização falhou novamente:", err.message);
+    });
+  };
   
   const handleLogout = () => {
     setUser(null);
@@ -121,6 +134,15 @@ export default function AccessPage() {
       <div className="flex flex-col min-h-screen bg-muted/40">
         <UserHeader user={user} onLogout={handleLogout} />
         <main className="flex-1 p-4 sm:p-6 space-y-6">
+          {locationError && (
+             <Alert variant="destructive">
+              <AlertTitle>Permissão de Localização Necessária</AlertTitle>
+              <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <span>{locationError}</span>
+                <Button variant="secondary" size="sm" onClick={handleRetryLocation}>Tentar Novamente</Button>
+              </AlertDescription>
+            </Alert>
+          )}
           <AccessGateControl 
             accessibleGates={user.accessibleGates || []}
             onGateAction={handleGateAction}
