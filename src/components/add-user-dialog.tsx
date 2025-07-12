@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -27,9 +27,10 @@ import { toast } from '@/hooks/use-toast';
 export function AddUserDialog() {
   const [date, setDate] = useState<DateRange | undefined>();
   const [accessGranted, setAccessGranted] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', accessCode: '', invites: '1' });
+  const [formData, setFormData] = useState({ name: '', email: '', invites: '1' });
+  const [accessCode, setAccessCode] = useState('');
   
-  const registrationLink = "https://porteiro.app/register?code=" + formData.accessCode;
+  const registrationLink = "https://porteiro.app/register?code=" + accessCode;
 
   const whatsappMessage = `Olá ${formData.name},
 
@@ -38,7 +39,7 @@ Você recebeu um convite de acesso para a nossa propriedade!
 Para garantir sua entrada, por favor, complete seu cadastro no link abaixo:
 ${registrationLink}
 
-Seu código de acesso para os portões é: ${formData.accessCode}
+Seu código de acesso para os portões é: ${accessCode}
 
 O seu acesso estará válido de ${date?.from ? format(date.from, 'dd/MM/yyyy') : ''} até ${date?.to ? format(date.to, 'dd/MM/yyyy') : ''}.
 
@@ -49,11 +50,10 @@ Qualquer dúvida, estamos à disposição!`;
     const form = e.target as HTMLFormElement;
     const name = (form.elements.namedItem('name') as HTMLInputElement).value;
     const email = (form.elements.namedItem('email') as HTMLInputElement).value;
-    const accessCode = (form.elements.namedItem('accessCode') as HTMLInputElement).value;
     const invites = (form.elements.namedItem('invites') as HTMLInputElement).value;
 
-    if (name && email && accessCode && invites && date?.from && date?.to) {
-        setFormData({ name, email, accessCode, invites });
+    if (name && email && invites && date?.from && date?.to) {
+        setFormData({ name, email, invites });
         setAccessGranted(true);
     } else {
         toast({
@@ -71,15 +71,28 @@ Qualquer dúvida, estamos à disposição!`;
       description: 'O texto para o WhatsApp foi copiado para a área de transferência.',
     });
   };
+  
+  const generateAccessCode = () => {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
 
   const resetState = () => {
     setAccessGranted(false);
-    setFormData({ name: '', email: '', accessCode: '', invites: '1' });
+    setFormData({ name: '', email: '', invites: '1' });
     setDate(undefined);
+    setAccessCode('');
+  }
+
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      setAccessCode(generateAccessCode());
+    } else {
+      resetState();
+    }
   }
 
   return (
-    <Dialog onOpenChange={(open) => !open && resetState()}>
+    <Dialog onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm" className="gap-1">
           <UserPlus className="h-3.5 w-3.5" />
@@ -113,7 +126,7 @@ Qualquer dúvida, estamos à disposição!`;
                     <Label htmlFor="accessCode" className="text-right">
                         Cód. de Acesso
                     </Label>
-                    <Input id="accessCode" name="accessCode" placeholder="ex: VISITA123" className="col-span-3" required/>
+                    <Input id="accessCode" name="accessCode" value={accessCode} className="col-span-3 font-mono" readOnly/>
                 </div>
                  <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="invites" className="text-right">
@@ -178,10 +191,10 @@ Qualquer dúvida, estamos à disposição!`;
                 <Label htmlFor="whatsappMessage">Mensagem para WhatsApp</Label>
                 <Textarea id="whatsappMessage" value={whatsappMessage} readOnly rows={12} className="text-sm" />
                 <div className="flex gap-2 justify-end">
-                    <Button variant="secondary" onClick={handleCopy}><Copy className="mr-2"/>Copiar Texto</Button>
+                    <Button variant="secondary" onClick={handleCopy}><Copy className="mr-2 h-4 w-4"/>Copiar Texto</Button>
                     <Button asChild>
                        <a href={`https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`} target="_blank" rel="noopener noreferrer">
-                          <Send className="mr-2"/>Enviar via WhatsApp
+                          <Send className="mr-2 h-4 w-4"/>Enviar via WhatsApp
                         </a>
                     </Button>
                 </div>
