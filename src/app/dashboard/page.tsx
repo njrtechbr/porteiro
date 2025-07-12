@@ -61,7 +61,7 @@ export default function DashboardPage() {
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
       <div className="lg:col-span-4 space-y-4">
         <GateControl />
-        {currentUser?.role === 'Hóspede' && <GuestInviteCard invites={currentUser.invites} />}
+        <GuestInviteCard invites={currentUser?.invites} />
       </div>
       <div className="lg:col-span-3 space-y-4">
         <UserAccessList title="Acesso Ativo" users={activeUsers} icon={KeyRound} />
