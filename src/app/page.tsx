@@ -23,11 +23,11 @@ export default function LoginPage() {
             <form className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="familia@porteiro.com" required />
+                <Input id="email" type="email" placeholder="admin@porteiro.com" defaultValue="admin@porteiro.com" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Senha</Label>
-                <Input id="password" type="password" required />
+                <Input id="password" type="password" defaultValue="password" required />
               </div>
               <Button type="submit" className="w-full" asChild>
                 <Link href="/dashboard">Entrar</Link>
