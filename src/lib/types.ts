@@ -1,4 +1,12 @@
+import type { LucideIcon } from "lucide-react";
+
 export type Gate = 'nicaragua' | 'belgica';
+
+export type GateDetails = {
+    id: Gate;
+    name: string;
+    icon: LucideIcon;
+};
 
 export type User = {
   id: string;

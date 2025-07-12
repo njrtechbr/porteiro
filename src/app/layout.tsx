@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 export const metadata: Metadata = {
   title: 'Porteiro',
   description: 'Sistema inteligente de controle de acesso.',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
