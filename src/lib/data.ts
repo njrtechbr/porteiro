@@ -91,7 +91,7 @@ const logs: AccessLog[] = [
   {
     id: 'log1',
     user: users[1],
-    action: 'Portão Aberto',
+    action: 'Portão Acionado',
     timestamp: subDays(now, 1),
     details: 'Acionamento via App (Av. Nicarágua) - GPS: -23.5505, -46.6333',
   },
@@ -105,7 +105,7 @@ const logs: AccessLog[] = [
   {
     id: 'log3',
     user: users[2],
-    action: 'Portão Aberto',
+    action: 'Portão Acionado',
     timestamp: subDays(now, 3),
     details: 'Acionamento via App (Av. Nicarágua) - GPS: -23.5505, -46.6333',
   },
@@ -133,7 +133,7 @@ const logs: AccessLog[] = [
   {
     id: 'log7',
     user: users[3],
-    action: 'Portão Aberto',
+    action: 'Portão Acionado',
     timestamp: subDays(now, 1),
     details: 'Acionamento via App (Av. Bélgica) - GPS: -23.5505, -46.6333',
   }

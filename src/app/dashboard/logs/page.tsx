@@ -11,7 +11,7 @@ export default function LogsPage() {
   const logs: AccessLog[] = getLogs();
 
   const getActionVariant = (action: string) => {
-    if (action.includes('Aberto')) return 'default';
+    if (action.includes('Acionado')) return 'default';
     if (action.includes('Concedido')) return 'secondary';
     if (action.includes('Registrado')) return 'outline';
     return 'destructive';

@@ -85,7 +85,7 @@ export default function AccessPage() {
         const newLog: AccessLog = {
           id: `log${Date.now()}`,
           user: { id: user.id, name: user.name, avatar: user.avatar },
-          action: 'Portão Aberto',
+          action: 'Portão Acionado',
           timestamp: new Date(),
           details: `Acionamento via App (${gateDetails.name}) - ${locationString}`,
         };
