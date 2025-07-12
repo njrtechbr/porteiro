@@ -1,7 +1,7 @@
 'use server';
 
 import type { UserCreation, UserUpdate, LogCreation, User, AccessLog } from './types';
-import { users as staticUsers, logs as staticLogs } from './data';
+import { users, logs } from './data';
 import { revalidatePath } from 'next/cache';
 
 // This file acts as a service layer. In the future, you can replace the logic
@@ -12,12 +12,12 @@ import { revalidatePath } from 'next/cache';
 
 export async function getAllUsers(): Promise<User[]> {
   // TODO: Replace with Prisma call: `await prisma.user.findMany()`
-  return Promise.resolve(staticUsers);
+  return Promise.resolve(users);
 }
 
 export async function getUserById(id: string): Promise<User | null> {
   // TODO: Replace with Prisma call: `await prisma.user.findUnique({ where: { id } })`
-  const user = staticUsers.find(u => u.id === id) || null;
+  const user = users.find(u => u.id === id) || null;
   return Promise.resolve(user);
 }
 
@@ -28,7 +28,7 @@ export async function addUser(userData: UserCreation): Promise<User | null> {
     ...userData,
     avatar: 'https://placehold.co/100x100.png', // Default avatar
   };
-  staticUsers.push(newUser);
+  users.push(newUser);
 
   await addLogEntry({
     userId: newUser.id,
@@ -43,12 +43,12 @@ export async function addUser(userData: UserCreation): Promise<User | null> {
 
 export async function updateUser(userId: string, data: UserUpdate): Promise<User | null> {
   // TODO: Replace with Prisma call: `await prisma.user.update({ where: { id: userId }, data })`
-  const userIndex = staticUsers.findIndex(u => u.id === userId);
+  const userIndex = users.findIndex(u => u.id === userId);
   if (userIndex === -1) return null;
 
-  const originalUser = staticUsers[userIndex];
+  const originalUser = users[userIndex];
   const updatedUser = { ...originalUser, ...data };
-  staticUsers[userIndex] = updatedUser;
+  users[userIndex] = updatedUser;
   
   await addLogEntry({
     userId: '1', // Admin user
@@ -63,11 +63,11 @@ export async function updateUser(userId: string, data: UserUpdate): Promise<User
 
 export async function deleteUser(userId: string): Promise<boolean> {
   // TODO: Replace with Prisma call: `await prisma.user.delete({ where: { id: userId } })`
-  const userIndex = staticUsers.findIndex(u => u.id === userId);
+  const userIndex = users.findIndex(u => u.id === userId);
   if (userIndex === -1) return false;
   
-  const deletedUser = staticUsers[userIndex];
-  staticUsers.splice(userIndex, 1);
+  const deletedUser = users[userIndex];
+  users.splice(userIndex, 1);
   
   await addLogEntry({
     userId: '1', // Admin user
@@ -81,16 +81,16 @@ export async function deleteUser(userId: string): Promise<boolean> {
 
 export async function revokeUserAccess(userId: string): Promise<boolean> {
     // TODO: Replace with a more sophisticated Prisma update
-    const userIndex = staticUsers.findIndex(u => u.id === userId);
+    const userIndex = users.findIndex(u => u.id === userId);
     if (userIndex === -1) return false;
 
-    staticUsers[userIndex].status = 'expirado';
-    staticUsers[userIndex].accessEnd = new Date(); // Set access end to now
+    users[userIndex].status = 'expirado';
+    users[userIndex].accessEnd = new Date(); // Set access end to now
     
     await addLogEntry({
         userId: '1', // Admin User
         action: 'Acesso Revogado',
-        details: `Acesso de ${staticUsers[userIndex].name} foi revogado.`,
+        details: `Acesso de ${users[userIndex].name} foi revogado.`,
     });
 
     revalidatePath('/dashboard/users');
@@ -102,20 +102,20 @@ export async function revokeUserAccess(userId: string): Promise<boolean> {
 
 export async function getAllLogs(): Promise<AccessLog[]> {
     // TODO: Replace with Prisma call: `await prisma.accessLog.findMany({ include: { user: true }, orderBy: { timestamp: 'desc' } })`
-    const sortedLogs = staticLogs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    const sortedLogs = [...logs].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     return Promise.resolve(sortedLogs);
 }
 
 export async function getLogsByUserId(userId: string): Promise<AccessLog[]> {
     // TODO: Replace with Prisma call: `await prisma.accessLog.findMany({ where: { userId }, include: { user: true }, orderBy: { timestamp: 'desc' } })`
-    const userLogs = staticLogs.filter(log => log.user.id === userId);
+    const userLogs = logs.filter(log => log.user.id === userId);
     const sortedLogs = userLogs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     return Promise.resolve(sortedLogs);
 }
 
 export async function addLogEntry(logData: LogCreation): Promise<AccessLog | null> {
     // TODO: Replace with Prisma call: `await prisma.accessLog.create({ data: ... })`
-    const user = staticUsers.find(u => u.id === logData.userId);
+    const user = users.find(u => u.id === logData.userId);
     if (!user) return null;
 
     const newLog: AccessLog = {
@@ -125,7 +125,7 @@ export async function addLogEntry(logData: LogCreation): Promise<AccessLog | nul
         details: logData.details,
         timestamp: new Date(),
     };
-    staticLogs.push(newLog);
+    logs.push(newLog);
     revalidatePath('/dashboard/logs');
     revalidatePath('/access'); // Revalidate access page for the user
     return Promise.resolve(newLog);

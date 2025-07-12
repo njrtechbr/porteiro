@@ -3,7 +3,7 @@ import type { User, AccessLog } from './types';
 
 const now = new Date();
 
-const users: User[] = [
+export const users: User[] = [
   {
     id: '1',
     name: 'Admin da Casa',
@@ -87,7 +87,7 @@ const users: User[] = [
   },
 ];
 
-const logs: AccessLog[] = [
+export const logs: AccessLog[] = [
   {
     id: 'log1',
     user: users[1],
@@ -138,7 +138,3 @@ const logs: AccessLog[] = [
     details: 'Acionamento via App (Av. Bélgica) - GPS: -23.5505, -46.6333',
   }
 ];
-
-
-export const getUsers = () => users;
-export const getLogs = () => logs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
