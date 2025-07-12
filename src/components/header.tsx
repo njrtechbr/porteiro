@@ -28,7 +28,7 @@ export function Header() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="sm:max-w-xs">
-          <SheetHeader>
+           <SheetHeader>
             <SheetTitle className="sr-only">Menu Principal</SheetTitle>
           </SheetHeader>
           <nav className="grid gap-6 text-lg font-medium">
