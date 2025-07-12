@@ -1,4 +1,7 @@
-import { config } from 'dotenv';
+import {config} from 'dotenv';
 config();
 
-import '@/ai/flows/generate-terms-of-service.ts';
+import {ai} from './genkit';
+import './flows/generate-terms-of-service';
+
+export * from './flows/generate-terms-of-service';

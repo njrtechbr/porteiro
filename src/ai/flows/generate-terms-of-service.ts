@@ -8,23 +8,27 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'genkit/zod';
 
 const GenerateTermsOfServiceInputSchema = z.object({
   liability: z.string().describe('The liability terms of the service.'),
   dataUse: z.string().describe('How the user data will be used.'),
-  serviceDescription: z.string().describe('A description of the service provided.'),
+  serviceDescription: z
+    .string()
+    .describe('A description of the service provided.'),
 });
-export type GenerateTermsOfServiceInput = z.infer<typeof GenerateTermsOfServiceInputSchema>;
+export type GenerateTermsOfServiceInput = z.infer<
+  typeof GenerateTermsOfServiceInputSchema
+>;
 
 const GenerateTermsOfServiceOutputSchema = z.object({
-  termsOfService: z.string().describe('The generated terms of service document.'),
+  termsOfService: z
+    .string()
+    .describe('The generated terms of service document.'),
 });
-export type GenerateTermsOfServiceOutput = z.infer<typeof GenerateTermsOfServiceOutputSchema>;
-
-export async function generateTermsOfService(input: GenerateTermsOfServiceInput): Promise<GenerateTermsOfServiceOutput> {
-  return generateTermsOfServiceFlow(input);
-}
+export type GenerateTermsOfServiceOutput = z.infer<
+  typeof GenerateTermsOfServiceOutputSchema
+>;
 
 const prompt = ai.definePrompt({
   name: 'generateTermsOfServicePrompt',
@@ -47,8 +51,14 @@ const generateTermsOfServiceFlow = ai.defineFlow(
     inputSchema: GenerateTermsOfServiceInputSchema,
     outputSchema: GenerateTermsOfServiceOutputSchema,
   },
-  async input => {
+  async (input) => {
     const {output} = await prompt(input);
     return output!;
   }
 );
+
+export async function generateTermsOfService(
+  input: GenerateTermsOfServiceInput
+): Promise<GenerateTermsOfServiceOutput> {
+  return generateTermsOfServiceFlow(input);
+}
