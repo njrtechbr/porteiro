@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarIcon, UserPlus, Copy, Send } from 'lucide-react';
+import { Calendar as CalendarIcon, UserPlus, Copy, Send, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -25,10 +25,17 @@ import { Textarea } from './ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { Checkbox } from './ui/checkbox';
 import type { Gate } from '@/lib/types';
+import { addUser } from '@/lib/actions';
 
-export function AddUserDialog() {
+interface AddUserDialogProps {
+  onUserAdded: () => void;
+}
+
+export function AddUserDialog({ onUserAdded }: AddUserDialogProps) {
+  const [isOpen, setIsOpen] = useState(false);
   const [date, setDate] = useState<DateRange | undefined>();
   const [accessGranted, setAccessGranted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', invites: '1' });
   const [accessCode, setAccessCode] = useState('');
   const [accessibleGates, setAccessibleGates] = useState<Gate[]>([]);
@@ -56,22 +63,52 @@ O seu acesso estará válido de ${date?.from ? format(date.from, 'dd/MM/yyyy') :
 
 Qualquer dúvida, estamos à disposição!`;
 
-  const handleGrantAccess = (e: React.FormEvent) => {
+  const handleGrantAccess = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     const form = e.target as HTMLFormElement;
     const name = (form.elements.namedItem('name') as HTMLInputElement).value;
     const email = (form.elements.namedItem('email') as HTMLInputElement).value;
     const invites = (form.elements.namedItem('invites') as HTMLInputElement).value;
 
-    if (name && email && invites && date?.from && date?.to && accessibleGates.length > 0) {
-        setFormData({ name, email, invites });
-        setAccessGranted(true);
-    } else {
+    if (!name || !email || !invites || !date?.from || !date?.to || accessibleGates.length === 0) {
         toast({
             variant: "destructive",
             title: "Erro de Validação",
             description: "Por favor, preencha todos os campos, selecione um período e ao menos um portão de acesso.",
-        })
+        });
+        setIsLoading(false);
+        return;
+    }
+    
+    try {
+      const newUser = await addUser({
+        name,
+        email,
+        cpf: '', // CPF can be collected on registration
+        role: 'Hóspede',
+        accessStart: date.from,
+        accessEnd: date.to,
+        accessCode: accessCode,
+        invites: parseInt(invites, 10),
+        accessibleGates: accessibleGates,
+        status: 'pendente'
+      });
+      if (newUser) {
+        setFormData({ name, email, invites });
+        setAccessGranted(true);
+        onUserAdded();
+      } else {
+        throw new Error('Falha ao criar usuário.');
+      }
+    } catch (error) {
+       toast({
+        variant: "destructive",
+        title: "Erro no Servidor",
+        description: (error as Error).message || "Não foi possível adicionar o usuário.",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -102,6 +139,7 @@ Qualquer dúvida, estamos à disposição!`;
   }
 
   const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
     if (open) {
       setAccessCode(generateAccessCode());
     } else {
@@ -110,7 +148,7 @@ Qualquer dúvida, estamos à disposição!`;
   }
 
   return (
-    <Dialog onOpenChange={handleOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm" className="gap-1">
           <UserPlus className="h-3.5 w-3.5" />
@@ -213,7 +251,10 @@ Qualquer dúvida, estamos à disposição!`;
               </div>
             </form>
             <DialogFooter>
-              <Button type="submit" form="addUserForm">Conceder Acesso</Button>
+              <Button type="submit" form="addUserForm" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Conceder Acesso
+              </Button>
             </DialogFooter>
           </>
         ) : (
@@ -238,7 +279,7 @@ Qualquer dúvida, estamos à disposição!`;
             </div>
             <DialogFooter>
                 <DialogClose asChild>
-                    <Button variant="outline" onClick={resetState}>Fechar</Button>
+                    <Button variant="outline" onClick={() => handleOpenChange(false)}>Fechar</Button>
                 </DialogClose>
             </DialogFooter>
           </>

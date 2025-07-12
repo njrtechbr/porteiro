@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { User, AccessLog, Gate, GateDetails } from '@/lib/types';
-import { getUsers, getLogs } from '@/lib/data';
+import { getUserById, getLogsByUserId, addLogEntry } from '@/lib/actions';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
@@ -21,18 +21,25 @@ export default function AccessPage() {
   const [locationError, setLocationError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Development bypass: Automatically log in as a default user
-    const allUsers = getUsers();
-    const defaultUser = allUsers.find(u => u.id === '2'); // Alice, a guest with access
-    
-    if (defaultUser) {
-      setUser(defaultUser);
-      const allLogs = getLogs();
-      setUserLogs(allLogs.filter(log => log.user.id === defaultUser.id));
-    } else {
-      setError('Usuário de desenvolvimento padrão não encontrado.');
+    async function loadUserData() {
+      // Development bypass: Automatically log in as a default user
+      const defaultUserId = '2'; // Alice, a guest with access
+      try {
+        const fetchedUser = await getUserById(defaultUserId);
+        if (fetchedUser) {
+          setUser(fetchedUser);
+          const fetchedLogs = await getLogsByUserId(defaultUserId);
+          setUserLogs(fetchedLogs);
+        } else {
+          setError('Usuário de desenvolvimento padrão não encontrado.');
+        }
+      } catch (err) {
+        setError('Falha ao carregar dados do usuário.');
+      } finally {
+        setLoading(false);
+      }
     }
-    setLoading(false);
+    loadUserData();
   }, []);
 
   const getLocation = (): Promise<{ latitude: number; longitude: number }> => {
@@ -80,30 +87,30 @@ export default function AccessPage() {
       const location = await getLocation();
       const locationString = `GPS: ${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}`;
       
-      // Simulate network delay for gate action
-      setTimeout(() => {
-        const newLog: AccessLog = {
-          id: `log${Date.now()}`,
-          user: { id: user.id, name: user.name, avatar: user.avatar },
-          action: 'Portão Acionado',
-          timestamp: new Date(),
-          details: `Acionamento via App (${gateDetails.name}) - ${locationString}`,
-        };
-        
-        setUserLogs(prevLogs => [newLog, ...prevLogs]);
-        
-        toast({
-          title: 'Portão Acionado',
-          description: `O portão da ${gateDetails.name} foi acionado com sucesso.`,
-        });
-        setLoadingGate(null);
-      }, 1000);
+      const details = `Acionamento via App (${gateDetails.name}) - ${locationString}`;
+      
+      const newLog = await addLogEntry({
+        userId: user.id,
+        action: 'Portão Acionado',
+        details: details,
+      });
+
+      if (newLog) {
+         setUserLogs(prevLogs => [newLog, ...prevLogs]);
+         toast({
+            title: 'Portão Acionado',
+            description: `O portão da ${gateDetails.name} foi acionado com sucesso.`,
+          });
+      } else {
+        throw new Error("Falha ao registrar a ação.")
+      }
+      setLoadingGate(null);
 
     } catch (error) {
        toast({
         variant: 'destructive',
-        title: 'Falha na Localização',
-        description: (error as Error).message || 'Não foi possível obter a sua localização para acionar o portão.',
+        title: 'Falha na Ação',
+        description: (error as Error).message || 'Não foi possível acionar o portão.',
       });
       setLoadingGate(null);
     }

@@ -12,16 +12,20 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  cpf?: string;
+  cpf: string;
   role: 'Admin' | 'Família' | 'Hóspede' | 'Convidado';
   accessStart: Date | null;
   accessEnd: Date | null;
-  accessCode?: string;
-  invites?: number;
+  accessCode: string;
+  invites: number;
   avatar: string;
   status: 'ativo' | 'pendente' | 'expirado';
-  accessibleGates?: Gate[];
+  accessibleGates: Gate[];
 };
+
+export type UserCreation = Omit<User, 'id' | 'avatar'>;
+export type UserUpdate = Partial<Omit<User, 'id' | 'avatar' | 'cpf'>>;
+
 
 export type AccessLog = {
   id: string;
@@ -30,3 +34,9 @@ export type AccessLog = {
   timestamp: Date;
   details: string;
 };
+
+export type LogCreation = {
+  userId: string;
+  action: string;
+  details: string;
+}

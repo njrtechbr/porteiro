@@ -1,6 +1,6 @@
-
 'use client';
 
+import { useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,23 +11,27 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { toast } from '@/hooks/use-toast';
 import type { User } from '@/lib/types';
+import { Button } from './ui/button';
+import { Loader2 } from 'lucide-react';
 
 interface RevokeUserDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   user: User;
+  onRevoke: (userId: string) => Promise<boolean>;
 }
 
-export function RevokeUserDialog({ isOpen, setIsOpen, user }: RevokeUserDialogProps) {
-  const handleRevoke = () => {
-    // Lógica de revogação simulada
-    toast({
-      title: 'Acesso Revogado',
-      description: `O acesso de ${user.name} foi revogado com sucesso.`,
-    });
-    setIsOpen(false);
+export function RevokeUserDialog({ isOpen, setIsOpen, user, onRevoke }: RevokeUserDialogProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleRevoke = async () => {
+    setIsLoading(true);
+    const success = await onRevoke(user.id);
+    if (success) {
+      setIsOpen(false);
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -38,12 +42,15 @@ export function RevokeUserDialog({ isOpen, setIsOpen, user }: RevokeUserDialogPr
           <AlertDialogDescription>
             Tem certeza de que deseja revogar o acesso de{' '}
             <span className="font-semibold text-foreground">{user.name}</span>? Esta ação não pode ser
-            desfeita.
+            desfeita. O status do usuário será alterado para 'expirado'.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={handleRevoke}>Continuar</AlertDialogAction>
+          <AlertDialogCancel disabled={isLoading}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction onClick={handleRevoke} disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Continuar
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

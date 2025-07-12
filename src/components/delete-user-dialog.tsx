@@ -1,6 +1,6 @@
-
 'use client';
 
+import { useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,26 +11,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { toast } from '@/hooks/use-toast';
 import type { User } from '@/lib/types';
 import { buttonVariants } from './ui/button';
 import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 interface DeleteUserDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   user: User;
+  onDelete: (userId: string) => Promise<boolean>;
 }
 
-export function DeleteUserDialog({ isOpen, setIsOpen, user }: DeleteUserDialogProps) {
-  const handleDelete = () => {
-    // Lógica de exclusão simulada
-    toast({
-      variant: 'destructive',
-      title: 'Usuário Excluído',
-      description: `${user.name} foi excluído permanentemente do sistema.`,
-    });
-    setIsOpen(false);
+export function DeleteUserDialog({ isOpen, setIsOpen, user, onDelete }: DeleteUserDialogProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleDelete = async () => {
+    setIsLoading(true);
+    const success = await onDelete(user.id);
+    if (success) {
+      setIsOpen(false);
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -45,11 +47,13 @@ export function DeleteUserDialog({ isOpen, setIsOpen, user }: DeleteUserDialogPr
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             className={cn(buttonVariants({ variant: 'destructive' }))}
             onClick={handleDelete}
+            disabled={isLoading}
           >
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Excluir
           </AlertDialogAction>
         </AlertDialogFooter>

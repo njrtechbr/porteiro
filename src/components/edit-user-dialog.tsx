@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -14,10 +13,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import type { User } from '@/lib/types';
+import type { User, UserUpdate } from '@/lib/types';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarIcon, RefreshCw } from 'lucide-react';
+import { Calendar as CalendarIcon, RefreshCw, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -29,35 +28,37 @@ interface EditUserDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   user: User;
+  onSave: (userId: string, data: UserUpdate) => Promise<boolean>;
 }
 
-export function EditUserDialog({ isOpen, setIsOpen, user }: EditUserDialogProps) {
-  const [name, setName] = useState(user.name);
-  const [email, setEmail] = useState(user.email);
-  const [role, setRole] = useState(user.role);
+export function EditUserDialog({ isOpen, setIsOpen, user, onSave }: EditUserDialogProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState<UserUpdate>({});
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        accessStart: user.accessStart,
+        accessEnd: user.accessEnd,
+        accessCode: user.accessCode,
+        invites: user.invites,
+      });
+      setIsPermanent(!user.accessStart && !user.accessEnd);
+    }
+  }, [user]);
+
   const [date, setDate] = useState<DateRange | undefined>({
     from: user.accessStart || undefined,
     to: user.accessEnd || undefined,
   });
   const [isPermanent, setIsPermanent] = useState(!user.accessStart && !user.accessEnd);
-  const [accessCode, setAccessCode] = useState(user.accessCode || '');
-  const [invites, setInvites] = useState(user.invites?.toString() || '0');
-
-  useEffect(() => {
-    if (isOpen) {
-      setName(user.name);
-      setEmail(user.email);
-      setRole(user.role);
-      setDate({ from: user.accessStart || undefined, to: user.accessEnd || undefined });
-      setIsPermanent(!user.accessStart && !user.accessEnd);
-      setAccessCode(user.accessCode || '');
-      setInvites(user.invites?.toString() || '0');
-    }
-  }, [isOpen, user]);
 
   const generateNewAccessCode = () => {
     const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    setAccessCode(newCode);
+    setFormData(prev => ({ ...prev, accessCode: newCode }));
     toast({
       title: 'Novo Código Gerado',
       description: `O novo código de acesso é ${newCode}.`,
@@ -68,27 +69,40 @@ export function EditUserDialog({ isOpen, setIsOpen, user }: EditUserDialogProps)
     setIsPermanent(checked);
     if (checked) {
       setDate(undefined);
+      setFormData(prev => ({ ...prev, accessStart: null, accessEnd: null }));
+    } else {
+        const today = new Date();
+        const nextWeek = new Date(today.setDate(today.getDate() + 7));
+        setDate({ from: new Date(), to: nextWeek });
+        setFormData(prev => ({...prev, accessStart: new Date(), accessEnd: nextWeek}));
     }
   };
+  
+  const handleDateChange = (newDate: DateRange | undefined) => {
+      setDate(newDate);
+      setFormData(prev => ({...prev, accessStart: newDate?.from || null, accessEnd: newDate?.to || null}));
+  }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Lógica de salvamento simulada
-    console.log({
-      name,
-      email,
-      role,
-      date,
-      isPermanent,
-      accessCode,
-      invites
-    });
-    toast({
-      title: 'Usuário Atualizado',
-      description: `As informações de ${name} foram salvas.`,
-    });
-    setIsOpen(false);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: id === 'invites' ? parseInt(value) : value }));
   };
+
+  const handleRoleChange = (value: User['role']) => {
+    setFormData(prev => ({...prev, role: value}));
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const success = await onSave(user.id, formData);
+    if (success) {
+      setIsOpen(false);
+    }
+    setIsLoading(false);
+  };
+
+  if (!user) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -105,19 +119,19 @@ export function EditUserDialog({ isOpen, setIsOpen, user }: EditUserDialogProps)
               <Label htmlFor="name" className="text-right">
                 Nome
               </Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" />
+              <Input id="name" value={formData.name || ''} onChange={handleChange} className="col-span-3" />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="email" className="text-right">
                 Email
               </Label>
-              <Input id="email" value={email} onChange={(e) => setEmail(e.target.value)} className="col-span-3" />
+              <Input id="email" value={formData.email || ''} onChange={handleChange} className="col-span-3" />
             </div>
              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="role" className="text-right">
                     Função
                 </Label>
-                 <Select value={role} onValueChange={(value) => setRole(value as User['role'])}>
+                 <Select value={formData.role} onValueChange={handleRoleChange}>
                     <SelectTrigger className="col-span-3">
                         <SelectValue placeholder="Selecione uma função" />
                     </SelectTrigger>
@@ -163,7 +177,7 @@ export function EditUserDialog({ isOpen, setIsOpen, user }: EditUserDialogProps)
                       mode="range"
                       defaultMonth={date?.from}
                       selected={date}
-                      onSelect={setDate}
+                      onSelect={handleDateChange}
                       numberOfMonths={2}
                       locale={ptBR}
                     />
@@ -183,7 +197,7 @@ export function EditUserDialog({ isOpen, setIsOpen, user }: EditUserDialogProps)
                     Cód. Acesso
                 </Label>
                 <div className="col-span-3 flex items-center gap-2">
-                    <Input id="accessCode" value={accessCode} onChange={e => setAccessCode(e.target.value)} className="font-mono" />
+                    <Input id="accessCode" value={formData.accessCode || ''} onChange={handleChange} className="font-mono" />
                     <Button type="button" variant="outline" size="icon" onClick={generateNewAccessCode}>
                         <RefreshCw className="h-4 w-4"/>
                     </Button>
@@ -193,13 +207,16 @@ export function EditUserDialog({ isOpen, setIsOpen, user }: EditUserDialogProps)
                 <Label htmlFor="invites" className="text-right">
                 Convites
                 </Label>
-                <Input id="invites" type="number" value={invites} onChange={e => setInvites(e.target.value)} min="0" className="col-span-3" />
+                <Input id="invites" type="number" value={formData.invites || 0} onChange={handleChange} min="0" className="col-span-3" />
             </div>
           </div>
         </form>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setIsOpen(false)}>Cancelar</Button>
-          <Button type="submit" form="editUserForm">Salvar Alterações</Button>
+          <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isLoading}>Cancelar</Button>
+          <Button type="submit" form="editUserForm" disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Salvar Alterações
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
