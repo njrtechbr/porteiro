@@ -8,6 +8,7 @@ export type User = {
   role: 'Admin' | 'Família' | 'Hóspede' | 'Convidado';
   accessStart: Date | null;
   accessEnd: Date | null;
+  accessCode?: string;
   invites?: number;
   avatar: string;
   status: 'ativo' | 'pendente' | 'expirado';
@@ -16,7 +17,7 @@ export type User = {
 
 export type AccessLog = {
   id: string;
-  user: Pick<User, 'name' | 'avatar'>;
+  user: Pick<User, 'id' | 'name' | 'avatar'>;
   action: string;
   timestamp: Date;
   details: string;

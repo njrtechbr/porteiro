@@ -12,6 +12,7 @@ const users: User[] = [
     role: 'Admin',
     accessStart: null,
     accessEnd: null,
+    accessCode: 'ADMIN',
     avatar: 'https://placehold.co/100x100/34A049/ffffff.png?text=A',
     status: 'ativo',
     accessibleGates: ['nicaragua', 'belgica'],
@@ -24,6 +25,7 @@ const users: User[] = [
     role: 'Hóspede',
     accessStart: subDays(now, 2),
     accessEnd: addDays(now, 5),
+    accessCode: 'ALICE123',
     invites: 3,
     avatar: 'https://placehold.co/100x100.png',
     status: 'ativo',
@@ -37,6 +39,7 @@ const users: User[] = [
     role: 'Família',
     accessStart: null,
     accessEnd: null,
+    accessCode: 'SONIA123',
     avatar: 'https://placehold.co/100x100.png',
     status: 'ativo',
     accessibleGates: ['nicaragua'],
@@ -49,6 +52,7 @@ const users: User[] = [
     role: 'Convidado',
     accessStart: subDays(now, 2),
     accessEnd: addDays(now, 5),
+    accessCode: 'BETO123',
     avatar: 'https://placehold.co/100x100.png',
     status: 'ativo',
     accessibleGates: ['belgica'],
@@ -57,9 +61,11 @@ const users: User[] = [
     id: '5',
     name: 'Carlos Dias (Próximo)',
     email: 'carlos@exemplo.com',
+    cpf: '555.555.555-55',
     role: 'Hóspede',
     accessStart: addDays(now, 7),
     accessEnd: addDays(now, 14),
+    accessCode: 'CARLOS123',
     invites: 5,
     avatar: 'https://placehold.co/100x100.png',
     status: 'pendente',
@@ -69,9 +75,11 @@ const users: User[] = [
     id: '6',
     name: 'Davi Costa (Expirado)',
     email: 'd.costa@passado.com',
+    cpf: '666.666.666-66',
     role: 'Hóspede',
     accessStart: subDays(now, 20),
     accessEnd: subDays(now, 15),
+    accessCode: 'DAVI123',
     invites: 0,
     avatar: 'https://placehold.co/100x100.png',
     status: 'expirado',
@@ -122,8 +130,15 @@ const logs: AccessLog[] = [
     timestamp: subDays(now, 7),
     details: 'Registrado para estadia futura',
   },
+  {
+    id: 'log7',
+    user: users[3],
+    action: 'Portão Aberto',
+    timestamp: subDays(now, 1),
+    details: 'Abertura remota via aplicativo (Portão Bélgica)',
+  }
 ];
 
 
 export const getUsers = () => users;
-export const getLogs = () => logs;
+export const getLogs = () => logs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
