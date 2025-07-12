@@ -29,8 +29,7 @@ export function DashboardSidebar() {
             <span className="sr-only">Porteiro</span>
           </Link>
           {navItems.map((item) => {
-            const baseHref = item.href.includes('/settings') ? '/dashboard/settings' : item.href;
-            const isActive = item.exact ? pathname === item.href : pathname.startsWith(baseHref);
+            const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
              
             return (
               <Tooltip key={item.href}>
