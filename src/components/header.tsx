@@ -61,7 +61,7 @@ export function Header() {
               Registros
             </Link>
             <Link
-              href="/dashboard/settings/tos"
+              href="/dashboard/settings/home-assistant"
               className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
             >
               <Settings className="h-5 w-5" />

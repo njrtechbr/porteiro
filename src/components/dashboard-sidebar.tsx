@@ -11,7 +11,7 @@ const navItems = [
   { href: '/dashboard', label: 'Painel', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/users', label: 'Usuários', icon: Users },
   { href: '/dashboard/logs', label: 'Registros', icon: ClipboardList },
-  { href: '/dashboard/settings/tos', label: 'Configurações', icon: Settings },
+  { href: '/dashboard/settings/home-assistant', label: 'Configurações', icon: Settings },
 ];
 
 export function DashboardSidebar() {
