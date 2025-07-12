@@ -6,6 +6,7 @@ export type GateDetails = {
     id: Gate;
     name: string;
     icon: LucideIcon;
+    description: string;
 };
 
 export type User = {

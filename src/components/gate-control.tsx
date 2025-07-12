@@ -31,23 +31,31 @@ export function GateControl() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Button
-            size="lg"
-            onClick={() => handleGateAction('nicaragua', 'Av. Nicarágua')}
-            disabled={!!loadingGate}
-          >
-            {loadingGate === 'nicaragua' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Acionar Portão Av. Nicarágua
-          </Button>
-          <Button
-            size="lg"
-            variant="secondary"
-            onClick={() => handleGateAction('belgica', 'Av. Bélgica')}
-            disabled={!!loadingGate}
-          >
-             {loadingGate === 'belgica' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Acionar Portão Av. Bélgica
-          </Button>
+          <div className="flex flex-col items-center">
+            <Button
+              className="w-full"
+              size="lg"
+              onClick={() => handleGateAction('nicaragua', 'Av. Nicarágua')}
+              disabled={!!loadingGate}
+            >
+              {loadingGate === 'nicaragua' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Acionar Portão Av. Nicarágua
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2">Portão da frente. (No Google Maps: Av. Nova Zelândia)</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <Button
+              className="w-full"
+              size="lg"
+              variant="secondary"
+              onClick={() => handleGateAction('belgica', 'Av. Bélgica')}
+              disabled={!!loadingGate}
+            >
+              {loadingGate === 'belgica' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Acionar Portão Av. Bélgica
+            </Button>
+             <p className="text-xs text-muted-foreground mt-2">Portão dos fundos.</p>
+          </div>
         </div>
       </CardContent>
     </Card>
