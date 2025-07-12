@@ -14,9 +14,9 @@ export async function createTermsOfService(
     if (output?.termsOfService) {
       return { success: true, terms: output.termsOfService };
     }
-    return { success: false, error: 'Failed to generate content.' };
+    return { success: false, error: 'Falha ao gerar conteúdo.' };
   } catch (error) {
     console.error(error);
-    return { success: false, error: 'An unexpected error occurred.' };
+    return { success: false, error: 'Ocorreu um erro inesperado.' };
   }
 }

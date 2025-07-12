@@ -13,9 +13,9 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ScrollArea } from './ui/scroll-area';
 
 const FormSchema = z.object({
-  serviceDescription: z.string().min(10, 'Please provide a more detailed service description.'),
-  liability: z.string().min(10, 'Please describe the liability terms.'),
-  dataUse: z.string().min(10, 'Please explain how user data will be used.'),
+  serviceDescription: z.string().min(10, 'Forneça uma descrição de serviço mais detalhada.'),
+  liability: z.string().min(10, 'Descreva os termos de responsabilidade.'),
+  dataUse: z.string().min(10, 'Explique como os dados do usuário serão usados.'),
 });
 
 type FormValues = z.infer<typeof FormSchema>;
@@ -28,9 +28,9 @@ export function TosGenerator() {
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      serviceDescription: 'A smart gate access control system for residential properties, primarily for managing access for Airbnb guests and family members.',
-      liability: 'The homeowner is not liable for any injuries or damages that occur on the property. Users are responsible for their own safety and the security of their belongings. Any damage to the gate or property caused by the user will be their financial responsibility.',
-      dataUse: 'User data (name, email) is collected for identification and access management purposes only. It will not be shared with third parties. Access logs are maintained for security and auditing.',
+      serviceDescription: 'Um sistema de controle de acesso inteligente para propriedades residenciais, principalmente para gerenciar o acesso de hóspedes do Airbnb e familiares.',
+      liability: 'O proprietário não se responsabiliza por quaisquer ferimentos ou danos que ocorram na propriedade. Os usuários são responsáveis por sua própria segurança e pela segurança de seus pertences. Qualquer dano ao portão ou à propriedade causado pelo usuário será de sua responsabilidade financeira.',
+      dataUse: 'Os dados do usuário (nome, e-mail) são coletados apenas para fins de identificação e gerenciamento de acesso. Não serão compartilhados com terceiros. Os registros de acesso são mantidos para segurança e auditoria.',
     },
   });
 
@@ -44,7 +44,7 @@ export function TosGenerator() {
     if (result.success && result.terms) {
       setGeneratedTerms(result.terms);
     } else {
-      setError(result.error || 'An unknown error occurred.');
+      setError(result.error || 'Ocorreu um erro desconhecido.');
     }
 
     setIsLoading(false);
@@ -59,9 +59,9 @@ export function TosGenerator() {
             name="serviceDescription"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Service Description</FormLabel>
+                <FormLabel>Descrição do Serviço</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Describe the service provided..." rows={4} {...field} />
+                  <Textarea placeholder="Descreva o serviço fornecido..." rows={4} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -72,9 +72,9 @@ export function TosGenerator() {
             name="liability"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Liability Terms</FormLabel>
+                <FormLabel>Termos de Responsabilidade</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Describe liability terms..." rows={4} {...field} />
+                  <Textarea placeholder="Descreva os termos de responsabilidade..." rows={4} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -85,9 +85,9 @@ export function TosGenerator() {
             name="dataUse"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Data Use Policy</FormLabel>
+                <FormLabel>Política de Uso de Dados</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Explain how user data will be used..." rows={4} {...field} />
+                  <Textarea placeholder="Explique como os dados do usuário serão usados..." rows={4} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -95,16 +95,16 @@ export function TosGenerator() {
           />
           <Button type="submit" disabled={isLoading} className="w-full">
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Generate Document
+            Gerar Documento
           </Button>
         </form>
       </Form>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold font-headline">Generated Document</h3>
+        <h3 className="text-lg font-semibold font-headline">Documento Gerado</h3>
         {error && (
           <Alert variant="destructive">
-            <AlertTitle>Error</AlertTitle>
+            <AlertTitle>Erro</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
@@ -116,7 +116,7 @@ export function TosGenerator() {
           ) : generatedTerms ? (
             <pre className="whitespace-pre-wrap text-sm font-sans">{generatedTerms}</pre>
           ) : (
-            <p className="text-muted-foreground text-center pt-4">Your generated Terms of Service will appear here.</p>
+            <p className="text-muted-foreground text-center pt-4">Seus Termos de Serviço gerados aparecerão aqui.</p>
           )}
         </ScrollArea>
       </div>

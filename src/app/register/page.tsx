@@ -19,35 +19,35 @@ export default function RegisterPage() {
   };
 
   const termsOfService = `
-Last updated: [Date]
+Última atualização: [Data]
 
-Please read these terms and conditions carefully before using Our Service.
+Por favor, leia estes termos e condições cuidadosamente antes de usar Nosso Serviço.
 
-Interpretation and Definitions
+Interpretação e Definições
 ==============================
-Interpretation
+Interpretação
 --------------
-The words of which the initial letter is capitalized have meanings defined under the following conditions. The following definitions shall have the same meaning regardless of whether they appear in singular or in plural.
+As palavras cuja letra inicial é maiúscula têm significados definidos sob as seguintes condições. As seguintes definições terão o mesmo significado, independentemente de aparecerem no singular ou no plural.
 
-Definitions
+Definições
 -----------
-For the purposes of these Terms and Conditions:
-*   You means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.
-*   Company (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to GateKeeper.
-*   Service refers to the GateKeeper application.
-*   Terms and Conditions (also referred as "Terms") mean these Terms and Conditions that form the entire agreement between You and the Company regarding the use of the Service.
+Para os fins destes Termos e Condições:
+*   Você significa o indivíduo que acessa ou usa o Serviço, ou a empresa, ou outra entidade legal em nome da qual tal indivíduo está acessando ou usando o Serviço, conforme aplicável.
+*   Empresa (referida como "a Empresa", "Nós" ou "Nosso" neste Contrato) refere-se ao Porteiro.
+*   Serviço refere-se à aplicação Porteiro.
+*   Termos e Condições (também referidos como "Termos") significam estes Termos e Condições que formam o acordo integral entre Você e a Empresa em relação ao uso do Serviço.
 
-Acknowledgment
+Reconhecimento
 ==============
-These are the Terms and Conditions governing the use of this Service and the agreement that operates between You and the Company. These Terms and Conditions set out the rights and obligations of all users regarding the use of the Service.
+Estes são os Termos e Condições que regem o uso deste Serviço e o acordo que opera entre Você e a Empresa. Estes Termos e Condições estabelecem os direitos e obrigações de todos os usuários em relação ao uso do Serviço.
 
-Your access to and use of the Service is conditioned on Your acceptance of and compliance with these Terms and Conditions. These Terms and Conditions apply to all visitors, users and others who access or use the Service.
+Seu acesso e uso do Serviço estão condicionados à Sua aceitação e conformidade com estes Termos e Condições. Estes Termos e Condições aplicam-se a todos os visitantes, usuários e outras pessoas que acessam ou usam o Serviço.
 
-By accessing or using the Service You agree to be bound by these Terms and Conditions. If You disagree with any part of these Terms and Conditions then You may not access the Service.
+Ao acessar ou usar o Serviço, Você concorda em ficar vinculado a estes Termos e Condições. Se Você discordar de qualquer parte destes Termos e Condições, não poderá acessar o Serviço.
 
-User Responsibilities
+Responsabilidades do Usuário
 =====================
-You are responsible for maintaining the confidentiality of your account and password, including but not limited to the restriction of access to your computer and/or account. You agree to accept responsibility for any and all activities or actions that occur under your account and/or password.
+Você é responsável por manter a confidencialidade de sua conta e senha, incluindo, mas não se limitando à restrição de acesso ao seu computador e/ou conta. Você concorda em aceitar a responsabilidade por todas e quaisquer atividades ou ações que ocorram sob sua conta e/ou senha.
   `;
 
   return (
@@ -55,30 +55,30 @@ You are responsible for maintaining the confidentiality of your account and pass
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center text-center">
           <GateIcon className="mb-4 h-16 w-16 text-primary" />
-          <h1 className="font-headline text-5xl font-bold text-primary">GateKeeper</h1>
-          <p className="mt-2 text-muted-foreground">Create your access account.</p>
+          <h1 className="font-headline text-5xl font-bold text-primary">Porteiro</h1>
+          <p className="mt-2 text-muted-foreground">Crie sua conta de acesso.</p>
         </div>
         <Card className="shadow-2xl">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">Create an Account</CardTitle>
-            <CardDescription>Fill in the details below to get started.</CardDescription>
+            <CardTitle className="font-headline text-2xl">Criar uma Conta</CardTitle>
+            <CardDescription>Preencha os detalhes abaixo para começar.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleRegister} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input id="name" type="text" placeholder="John Doe" required />
+                <Label htmlFor="name">Nome Completo</Label>
+                <Input id="name" type="text" placeholder="João da Silva" required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="john.doe@example.com" required />
+                <Input id="email" type="email" placeholder="joao.silva@exemplo.com" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Senha</Label>
                 <Input id="password" type="password" required />
               </div>
               <div className="space-y-2">
-                <Label>Terms of Responsibility</Label>
+                <Label>Termos de Responsabilidade</Label>
                 <ScrollArea className="h-32 w-full rounded-md border p-4 text-sm">
                   {termsOfService}
                 </ScrollArea>
@@ -89,17 +89,17 @@ You are responsible for maintaining the confidentiality of your account and pass
                   htmlFor="terms"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  I have read and agree to the terms of responsibility
+                  Eu li e concordo com os termos de responsabilidade
                 </label>
               </div>
               <Button type="submit" className="w-full">
-                Create Account
+                Criar Conta
               </Button>
             </form>
             <div className="mt-4 text-center text-sm">
-              Already have an account?{' '}
+              Já tem uma conta?{' '}
               <Link href="/" className="font-medium text-primary underline underline-offset-4 hover:text-primary/80">
-                Log in
+                Entrar
               </Link>
             </div>
           </CardContent>

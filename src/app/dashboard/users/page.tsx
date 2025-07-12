@@ -6,6 +6,7 @@ import { MoreHorizontal } from 'lucide-react';
 import { getUsers } from '@/lib/data';
 import type { User } from '@/lib/types';
 import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AddUserDialog } from '@/components/add-user-dialog';
 
@@ -14,11 +15,11 @@ export default function UsersPage() {
 
   const getStatusVariant = (status: User['status']) => {
     switch (status) {
-      case 'active':
+      case 'ativo':
         return 'default';
-      case 'pending':
+      case 'pendente':
         return 'secondary';
-      case 'expired':
+      case 'expirado':
         return 'destructive';
       default:
         return 'outline';
@@ -28,8 +29,8 @@ export default function UsersPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">User Management</CardTitle>
-        <CardDescription>Manage all users and their access permissions.</CardDescription>
+        <CardTitle className="font-headline">Gerenciamento de Usuários</CardTitle>
+        <CardDescription>Gerencie todos os usuários e suas permissões de acesso.</CardDescription>
         <div className="flex justify-end">
            <AddUserDialog />
         </div>
@@ -38,12 +39,12 @@ export default function UsersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead className="hidden md:table-cell">Access Period</TableHead>
+              <TableHead>Usuário</TableHead>
+              <TableHead>Função</TableHead>
+              <TableHead className="hidden md:table-cell">Período de Acesso</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>
-                <span className="sr-only">Actions</span>
+                <span className="sr-only">Ações</span>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -63,8 +64,8 @@ export default function UsersPage() {
                 <TableCell>{user.role}</TableCell>
                 <TableCell className="hidden md:table-cell">
                   {user.accessStart && user.accessEnd
-                    ? `${format(user.accessStart, 'MMM d, yyyy')} - ${format(user.accessEnd, 'MMM d, yyyy')}`
-                    : 'Permanent'}
+                    ? `${format(user.accessStart, 'dd/MM/yyyy')} - ${format(user.accessEnd, 'dd/MM/yyyy')}`
+                    : 'Permanente'}
                 </TableCell>
                 <TableCell>
                   <Badge variant={getStatusVariant(user.status)} className="capitalize">{user.status}</Badge>
@@ -74,14 +75,14 @@ export default function UsersPage() {
                     <DropdownMenuTrigger asChild>
                       <button className="flex h-8 w-8 p-0 items-center justify-center rounded-md data-[state=open]:bg-muted">
                         <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Open menu</span>
+                        <span className="sr-only">Abrir menu</span>
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Revoke Access</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                      <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                      <DropdownMenuItem>Editar</DropdownMenuItem>
+                      <DropdownMenuItem>Revogar Acesso</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive">Excluir</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -92,7 +93,7 @@ export default function UsersPage() {
       </CardContent>
       <CardFooter>
         <div className="text-xs text-muted-foreground">
-          Showing <strong>1-{users.length}</strong> of <strong>{users.length}</strong> users
+          Mostrando <strong>1-{users.length}</strong> de <strong>{users.length}</strong> usuários
         </div>
       </CardFooter>
     </Card>

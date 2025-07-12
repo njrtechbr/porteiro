@@ -8,10 +8,10 @@ import { GateIcon } from './gate-icon';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/dashboard/users', icon: Users, label: 'Users' },
-  { href: '/dashboard/logs', icon: ClipboardList, label: 'Logs' },
-  { href: '/dashboard/settings/tos', icon: Settings, label: 'Settings' },
+  { href: '/dashboard', icon: LayoutDashboard, label: 'Painel' },
+  { href: '/dashboard/users', icon: Users, label: 'Usuários' },
+  { href: '/dashboard/logs', icon: ClipboardList, label: 'Registros' },
+  { href: '/dashboard/settings/tos', icon: Settings, label: 'Configurações' },
 ];
 
 export function DashboardSidebar() {
@@ -26,7 +26,7 @@ export function DashboardSidebar() {
             className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
           >
             <GateIcon className="h-5 w-5 transition-all group-hover:scale-110" />
-            <span className="sr-only">GateKeeper</span>
+            <span className="sr-only">Porteiro</span>
           </Link>
           {navItems.map((item) => (
             <Tooltip key={item.href}>
@@ -55,10 +55,10 @@ export function DashboardSidebar() {
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
               >
                 <LogOut className="h-5 w-5" />
-                <span className="sr-only">Logout</span>
+                <span className="sr-only">Sair</span>
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">Logout</TooltipContent>
+            <TooltipContent side="right">Sair</TooltipContent>
           </Tooltip>
         </nav>
       </TooltipProvider>

@@ -6,10 +6,10 @@ export default function TosPage() {
     <div className="grid gap-6">
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Terms of Service Generator</CardTitle>
+          <CardTitle className="font-headline">Gerador de Termos de Serviço</CardTitle>
           <CardDescription>
-            Use our AI-powered tool to generate a Terms of Service document for your users.
-            Enter the required details below and the AI will create a customized document.
+            Use nossa ferramenta com IA para gerar um documento de Termos de Serviço para seus usuários.
+            Insira os detalhes necessários abaixo e a IA criará um documento personalizado.
           </CardDescription>
         </CardHeader>
         <CardContent>

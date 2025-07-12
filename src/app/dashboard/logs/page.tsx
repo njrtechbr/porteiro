@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { getLogs } from '@/lib/data';
 import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { AccessLog } from '@/lib/types';
 
@@ -10,26 +11,26 @@ export default function LogsPage() {
   const logs: AccessLog[] = getLogs();
 
   const getActionVariant = (action: string) => {
-    if (action.includes('Opened')) return 'default';
-    if (action.includes('Granted')) return 'secondary';
-    if (action.includes('Registered')) return 'outline';
+    if (action.includes('Aberto')) return 'default';
+    if (action.includes('Concedido')) return 'secondary';
+    if (action.includes('Registrado')) return 'outline';
     return 'destructive';
   };
   
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Access Logs</CardTitle>
-        <CardDescription>An audit trail of all access and gate activities.</CardDescription>
+        <CardTitle className="font-headline">Registros de Acesso</CardTitle>
+        <CardDescription>Uma trilha de auditoria de todas as atividades de acesso e portão.</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead className="hidden md:table-cell">Details</TableHead>
-              <TableHead className="text-right">Timestamp</TableHead>
+              <TableHead>Usuário</TableHead>
+              <TableHead>Ação</TableHead>
+              <TableHead className="hidden md:table-cell">Detalhes</TableHead>
+              <TableHead className="text-right">Data e Hora</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -48,7 +49,7 @@ export default function LogsPage() {
                   <Badge variant={getActionVariant(log.action)}>{log.action}</Badge>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">{log.details}</TableCell>
-                <TableCell className="text-right text-muted-foreground">{format(log.timestamp, 'MMM d, yyyy, h:mm a')}</TableCell>
+                <TableCell className="text-right text-muted-foreground">{format(log.timestamp, 'd MMM, yyyy, HH:mm', { locale: ptBR })}</TableCell>
               </TableRow>
             ))}
           </TableBody>

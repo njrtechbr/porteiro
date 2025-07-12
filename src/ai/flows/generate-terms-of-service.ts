@@ -30,13 +30,14 @@ const prompt = ai.definePrompt({
   name: 'generateTermsOfServicePrompt',
   input: {schema: GenerateTermsOfServiceInputSchema},
   output: {schema: GenerateTermsOfServiceOutputSchema},
-  prompt: `You are a legal expert specializing in generating terms of service documents.
+  prompt: `Você é um especialista jurídico especializado na geração de documentos de termos de serviço.
+  Gere o documento em português do Brasil (pt-br).
 
-  Based on the following criteria, generate a terms of service document:
+  Com base nos seguintes critérios, gere um documento de termos de serviço:
 
-  Service Description: {{{serviceDescription}}}
-  Liability: {{{liability}}}
-  Data Use: {{{dataUse}}}
+  Descrição do Serviço: {{{serviceDescription}}}
+  Responsabilidade: {{{liability}}}
+  Uso de Dados: {{{dataUse}}}
   `,
 });
 

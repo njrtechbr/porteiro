@@ -2,12 +2,12 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  role: 'Admin' | 'Family' | 'Guest' | 'Invitee';
+  role: 'Admin' | 'Família' | 'Hóspede' | 'Convidado';
   accessStart: Date | null;
   accessEnd: Date | null;
   invites?: number;
   avatar: string;
-  status: 'active' | 'pending' | 'expired';
+  status: 'ativo' | 'pendente' | 'expirado';
 };
 
 export type AccessLog = {

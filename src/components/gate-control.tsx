@@ -18,8 +18,8 @@ export function GateControl() {
       setGateStatus(action === 'open' ? 'open' : 'closed');
       setIsLoading(false);
       toast({
-        title: `Gate ${action === 'open' ? 'Opened' : 'Closed'}`,
-        description: `The main gate has been successfully ${action === 'open' ? 'opened' : 'closed'}.`,
+        title: `Portão ${action === 'open' ? 'Aberto' : 'Fechado'}`,
+        description: `O portão principal foi ${action === 'open' ? 'aberto' : 'fechado'} com sucesso.`,
       });
     }, 1500);
   };
@@ -27,13 +27,13 @@ export function GateControl() {
   const getStatusInfo = () => {
     switch (gateStatus) {
       case 'open':
-        return { text: 'Open', color: 'bg-green-500' };
+        return { text: 'Aberto', color: 'bg-green-500' };
       case 'closed':
-        return { text: 'Closed', color: 'bg-red-500' };
+        return { text: 'Fechado', color: 'bg-red-500' };
       case 'opening':
-        return { text: 'Opening...', color: 'bg-yellow-500 animate-pulse' };
+        return { text: 'Abrindo...', color: 'bg-yellow-500 animate-pulse' };
       case 'closing':
-        return { text: 'Closing...', color: 'bg-yellow-500 animate-pulse' };
+        return { text: 'Fechando...', color: 'bg-yellow-500 animate-pulse' };
     }
   };
 
@@ -42,8 +42,8 @@ export function GateControl() {
   return (
     <Card className="shadow-md">
       <CardHeader>
-        <CardTitle className="font-headline text-xl">Main Gate Control</CardTitle>
-        <CardDescription>Remotely open or close the main property gate.</CardDescription>
+        <CardTitle className="font-headline text-xl">Controle do Portão Principal</CardTitle>
+        <CardDescription>Abra ou feche o portão principal da propriedade remotamente.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center justify-center rounded-lg bg-muted p-6">
@@ -53,7 +53,7 @@ export function GateControl() {
               <span className={cn('relative inline-flex h-3 w-3 rounded-full', color)}></span>
             </span>
             <p className="text-lg font-medium">
-              Gate Status: <span className="font-bold text-primary">{text}</span>
+              Status do Portão: <span className="font-bold text-primary">{text}</span>
             </p>
           </div>
         </div>
@@ -63,7 +63,7 @@ export function GateControl() {
             onClick={() => handleGateAction('open')}
             disabled={isLoading || gateStatus === 'open'}
           >
-            Open Gate
+            Abrir Portão
           </Button>
           <Button
             size="lg"
@@ -71,7 +71,7 @@ export function GateControl() {
             onClick={() => handleGateAction('close')}
             disabled={isLoading || gateStatus === 'closed'}
           >
-            Close Gate
+            Fechar Portão
           </Button>
         </div>
       </CardContent>

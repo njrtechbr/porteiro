@@ -30,14 +30,14 @@ function UserAccessList({ title, users, icon: Icon }: { title: string; users: Us
                   <p className="text-sm text-muted-foreground">{user.email}</p>
                 </div>
                 <div className="ml-auto text-right text-sm">
-                   <Badge variant={user.role === 'Family' ? 'secondary' : 'outline'}>{user.role}</Badge>
-                   {user.accessEnd && <p className="text-muted-foreground">ends {format(user.accessEnd, 'MMM d')}</p>}
+                   <Badge variant={user.role === 'Família' ? 'secondary' : 'outline'}>{user.role}</Badge>
+                   {user.accessEnd && <p className="text-muted-foreground">expira em {format(user.accessEnd, 'dd/MMM')}</p>}
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground pt-2">No users with {title.toLowerCase()}.</p>
+          <p className="text-sm text-muted-foreground pt-2">Nenhum usuário com {title.toLowerCase()}.</p>
         )}
       </CardContent>
     </Card>
@@ -47,17 +47,17 @@ function UserAccessList({ title, users, icon: Icon }: { title: string; users: Us
 function GuestInviteCard({ invites }: { invites?: number }) {
   if (invites === undefined) return null; // Or show something else for non-guests
 
-  const inviteLink = "https://gatekeeper.app/invite/a1b2c3d4";
+  const inviteLink = "https://porteiro.app/convite/a1b2c3d4";
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline text-xl">Your Guest Invites</CardTitle>
-        <CardDescription>Share this link to invite others. They will have access for the duration of your stay.</CardDescription>
+        <CardTitle className="font-headline text-xl">Seus Convites para Hóspedes</CardTitle>
+        <CardDescription>Compartilhe este link para convidar outras pessoas. Elas terão acesso durante a sua estadia.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <p className="text-sm font-medium">You have <span className="text-primary font-bold">{invites}</span> invites remaining.</p>
+          <p className="text-sm font-medium">Você tem <span className="text-primary font-bold">{invites}</span> convites restantes.</p>
         </div>
         <div className="flex items-center space-x-2">
           <Input id="invite-link" value={inviteLink} readOnly />
@@ -73,27 +73,27 @@ function GuestInviteCard({ invites }: { invites?: number }) {
 
 export default function DashboardPage() {
   const users = getUsers();
-  const currentUser = users.find(u => u.role === 'Guest'); // Assuming the logged in user is a guest for demo
+  const currentUser = users.find(u => u.role === 'Hóspede'); // Assuming the logged in user is a guest for demo
 
   const now = new Date();
   const activeUsers = users.filter(u => 
-    u.status === 'active' && 
-    (u.role === 'Family' || (u.accessStart && u.accessEnd && !isPast(u.accessEnd) && !isFuture(u.accessStart)))
+    u.status === 'ativo' && 
+    (u.role === 'Família' || (u.accessStart && u.accessEnd && !isPast(u.accessEnd) && !isFuture(u.accessStart)))
   );
   
   const upcomingUsers = users.filter(u => 
-    u.status === 'pending' && u.accessStart && isFuture(u.accessStart)
+    u.status === 'pendente' && u.accessStart && isFuture(u.accessStart)
   );
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
       <div className="lg:col-span-4 space-y-4">
         <GateControl />
-        {currentUser?.role === 'Guest' && <GuestInviteCard invites={currentUser.invites} />}
+        {currentUser?.role === 'Hóspede' && <GuestInviteCard invites={currentUser.invites} />}
       </div>
       <div className="lg:col-span-3 space-y-4">
-        <UserAccessList title="Active Access" users={activeUsers} icon={KeyRound} />
-        <UserAccessList title="Upcoming Access" users={upcomingUsers} icon={CalendarClock} />
+        <UserAccessList title="Acesso Ativo" users={activeUsers} icon={KeyRound} />
+        <UserAccessList title="Acessos Futuros" users={upcomingUsers} icon={CalendarClock} />
       </div>
     </div>
   );
