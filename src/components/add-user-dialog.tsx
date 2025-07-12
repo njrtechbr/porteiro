@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -39,8 +39,15 @@ export function AddUserDialog({ onUserAdded }: AddUserDialogProps) {
   const [formData, setFormData] = useState({ name: '', email: '', invites: '1' });
   const [accessCode, setAccessCode] = useState('');
   const [accessibleGates, setAccessibleGates] = useState<Gate[]>([]);
+  const [origin, setOrigin] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
+  }, []);
   
-  const registrationLink = "https://porteiro.app/register?code=" + accessCode;
+  const registrationLink = accessCode ? `${origin}/register?code=${accessCode}`: '';
 
   const getGateNames = () => {
     if (accessibleGates.length === 2) return "Portões Av. Nicarágua e Av. Bélgica";
@@ -262,7 +269,7 @@ Qualquer dúvida, estamos à disposição!`;
             <DialogHeader>
               <DialogTitle className="font-headline">Acesso Concedido!</DialogTitle>
               <DialogDescription>
-                Envie esta mensagem para <span className="font-bold text-primary">{formData.name}</span> concluir o cadastro.
+                Envie esta mensagem para <span className="font-bold text-primary">{formData.name}</span> para concluir o cadastro.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">

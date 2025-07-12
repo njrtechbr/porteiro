@@ -73,15 +73,15 @@ export default function SettingsPage() {
           <div className="space-y-2">
             <Label>Link de Cadastro para Convidados</Label>
              <div className="flex items-center space-x-2">
-                <Input id="invite-link" value="https://porteiro.app/register?code=..." readOnly />
+                <Input id="invite-link" value="/register?code=..." readOnly />
                 <Button variant="outline" size="icon" type="button" onClick={() => {
-                     navigator.clipboard.writeText("https://porteiro.app/register?code=...");
-                     toast({title: "Link de modelo copiado!"});
+                     navigator.clipboard.writeText("/register?code=...");
+                     toast({title: "Modelo de link copiado!"});
                 }}>
                     <Copy className="h-4 w-4" />
                 </Button>
             </div>
-            <p className="text-sm text-muted-foreground">Este é o link base. Um código único será gerado para cada convite.</p>
+            <p className="text-sm text-muted-foreground">O link é gerado dinamicamente. Um código único será adicionado para cada convite.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="welcomeMessage">Mensagem de Boas-vindas (modelo para WhatsApp)</Label>
