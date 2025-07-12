@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,30 +21,41 @@ export default function AccessPage() {
   const [accessCode, setAccessCode] = useState('');
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start with loading true
   const [userLogs, setUserLogs] = useState<AccessLog[]>([]);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  useEffect(() => {
+    // Development bypass: Automatically log in as a default user
+    const allUsers = getUsers();
+    const defaultUser = allUsers.find(u => u.id === '2'); // Alice, a guest with access
+    
+    if (defaultUser) {
+      setUser(defaultUser);
+      const allLogs = getLogs();
+      setUserLogs(allLogs.filter(log => log.user.id === defaultUser.id));
+    } else {
+        setError('Usuário de desenvolvimento padrão não encontrado.');
+    }
+    setLoading(false);
+  }, []); // Empty dependency array ensures this runs only once on mount
 
-    setTimeout(() => {
-      const allUsers = getUsers();
-      const foundUser = allUsers.find(
-        (u) => u.cpf === cpf && u.accessCode === accessCode && u.status === 'ativo'
-      );
 
-      if (foundUser) {
-        setUser(foundUser);
-        const allLogs = getLogs();
-        setUserLogs(allLogs.filter(log => log.user.id === foundUser.id));
-      } else {
-        setError('CPF ou Código de Acesso inválido, ou seu acesso não está ativo.');
-      }
-      setLoading(false);
-    }, 1000);
-  };
+  const handleLogout = () => {
+      setUser(null);
+      // In a real app, you would redirect or show the login form again.
+      // For this bypass, we will just clear the state.
+      // To log back in, the user would need to refresh the page.
+      setError("Você saiu. Atualize a página para re-logar como usuário de desenvolvimento.");
+  }
+
+
+  if (loading) {
+    return (
+        <div className="flex min-h-screen w-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    )
+  }
 
   if (user) {
     return (
@@ -87,67 +98,31 @@ export default function AccessPage() {
             </CardContent>
         </Card>
          <div className="text-center">
-             <Button variant="link" onClick={() => setUser(null)}>Sair</Button>
+             <Button variant="link" onClick={handleLogout}>Sair</Button>
          </div>
       </div>
     );
   }
 
+  // Fallback in case user is not found or during logout
   return (
-    <div className="w-full max-w-sm">
+     <div className="w-full max-w-sm">
       <div className="mb-8 flex flex-col items-center text-center">
         <GateIcon className="mb-4 h-16 w-16 text-primary" />
         <h1 className="font-headline text-5xl font-bold text-primary">Acesso Direto</h1>
-        <p className="mt-2 text-muted-foreground">Use seu CPF e código para acionar o portão.</p>
-      </div>
-      <Card className="shadow-2xl">
-        <CardHeader>
-          <CardTitle className="font-headline text-2xl">Login de Acesso</CardTitle>
-          <CardDescription>Insira seus dados para continuar.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            {error && (
-                <Alert variant="destructive">
-                    <AlertTitle>Erro de Acesso</AlertTitle>
+         {error && (
+                <Alert variant="destructive" className="mt-4">
+                    <AlertTitle>Acesso Encerrado</AlertTitle>
                     <AlertDescription>{error}</AlertDescription>
                 </Alert>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="cpf">CPF</Label>
-              <Input
-                id="cpf"
-                type="text"
-                placeholder="000.000.000-00"
-                required
-                value={cpf}
-                onChange={(e) => setCpf(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="access-code">Código de Acesso</Label>
-              <Input
-                id="access-code"
-                type="text"
-                placeholder="Seu código"
-                required
-                value={accessCode}
-                onChange={(e) => setAccessCode(e.target.value)}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Entrar
-            </Button>
-          </form>
-            <div className="mt-4 text-center text-sm">
+         )}
+        <div className="mt-4 text-center text-sm">
               É administrador?{' '}
               <Link href="/" className="font-medium text-primary underline underline-offset-4 hover:text-primary/80">
                 Acesse o painel
               </Link>
-            </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
