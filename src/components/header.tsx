@@ -1,5 +1,11 @@
 import Link from 'next/link';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import {
   Home,
@@ -22,6 +28,9 @@ export function Header() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="sm:max-w-xs">
+          <SheetHeader>
+            <SheetTitle className="sr-only">Menu Principal</SheetTitle>
+          </SheetHeader>
           <nav className="grid gap-6 text-lg font-medium">
             <Link
               href="/dashboard"
@@ -30,19 +39,31 @@ export function Header() {
               <GateIcon className="h-5 w-5 transition-all group-hover:scale-110" />
               <span className="sr-only">Porteiro</span>
             </Link>
-            <Link href="/dashboard" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+            >
               <Home className="h-5 w-5" />
               Painel
             </Link>
-            <Link href="/dashboard/users" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+            <Link
+              href="/dashboard/users"
+              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+            >
               <Users className="h-5 w-5" />
               Usuários
             </Link>
-            <Link href="/dashboard/logs" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+            <Link
+              href="/dashboard/logs"
+              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+            >
               <ClipboardList className="h-5 w-5" />
               Registros
             </Link>
-            <Link href="/dashboard/settings/tos" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+            <Link
+              href="/dashboard/settings/tos"
+              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+            >
               <Settings className="h-5 w-5" />
               Configurações
             </Link>
