@@ -42,6 +42,7 @@ export default function HomeAssistantPage() {
     setIsLoading(true);
     console.log(data)
     
+    // Simulação de salvamento e teste de conexão
     setTimeout(() => {
         toast({
             title: "Configurações Salvas",
