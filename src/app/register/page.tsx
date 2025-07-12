@@ -13,9 +13,12 @@ import { useRouter } from 'next/navigation';
 export default function RegisterPage() {
   const router = useRouter();
 
+  // In a real scenario, you'd use the query parameter `code` to find the user,
+  // update their status to 'ativo', and save their CPF and hashed password.
+  // For now, we just redirect.
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/dashboard');
+    router.push('/access'); 
   };
 
   const termsOfService = `
@@ -56,12 +59,12 @@ Você é responsável por manter a confidencialidade de sua conta e senha, inclu
         <div className="mb-8 flex flex-col items-center text-center">
           <GateIcon className="mb-4 h-16 w-16 text-primary" />
           <h1 className="font-headline text-5xl font-bold text-primary">Porteiro</h1>
-          <p className="mt-2 text-muted-foreground">Crie sua conta de acesso.</p>
+          <p className="mt-2 text-muted-foreground">Finalize seu cadastro de acesso.</p>
         </div>
         <Card className="shadow-2xl">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">Criar uma Conta</CardTitle>
-            <CardDescription>Preencha os detalhes abaixo para começar.</CardDescription>
+            <CardTitle className="font-headline text-2xl">Finalizar Cadastro</CardTitle>
+            <CardDescription>Preencha os detalhes abaixo para ativar seu acesso.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleRegister} className="space-y-4">
@@ -78,7 +81,7 @@ Você é responsável por manter a confidencialidade de sua conta e senha, inclu
                 <Input id="cpf" type="text" placeholder="000.000.000-00" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
+                <Label htmlFor="password">Crie uma Senha</Label>
                 <Input id="password" type="password" required />
               </div>
               <div className="space-y-2">
@@ -97,15 +100,9 @@ Você é responsável por manter a confidencialidade de sua conta e senha, inclu
                 </label>
               </div>
               <Button type="submit" className="w-full">
-                Criar Conta
+                Finalizar e Acessar
               </Button>
             </form>
-            <div className="mt-4 text-center text-sm">
-              Já tem uma conta?{' '}
-              <Link href="/" className="font-medium text-primary underline underline-offset-4 hover:text-primary/80">
-                Entrar
-              </Link>
-            </div>
           </CardContent>
         </Card>
       </div>
