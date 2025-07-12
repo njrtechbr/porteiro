@@ -73,6 +73,10 @@ Você é responsável por manter a confidencialidade de sua conta e senha, inclu
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" placeholder="joao.silva@exemplo.com" required />
               </div>
+               <div className="space-y-2">
+                <Label htmlFor="cpf">CPF</Label>
+                <Input id="cpf" type="text" placeholder="000.000.000-00" required />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Senha</Label>
                 <Input id="password" type="password" required />
