@@ -1,3 +1,6 @@
+
+'use client';
+
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -9,6 +12,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AddUserDialog } from '@/components/add-user-dialog';
+import { toast } from '@/hooks/use-toast';
 
 export default function UsersPage() {
   const users: User[] = getUsers();
@@ -24,6 +28,13 @@ export default function UsersPage() {
       default:
         return 'outline';
     }
+  };
+
+  const handleAction = (action: string, userName: string) => {
+    toast({
+      title: `Ação: ${action}`,
+      description: `Ação '${action}' acionada para o usuário ${userName}. (Funcionalidade simulada)`,
+    });
   };
 
   return (
@@ -80,9 +91,9 @@ export default function UsersPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                      <DropdownMenuItem>Editar</DropdownMenuItem>
-                      <DropdownMenuItem>Revogar Acesso</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">Excluir</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleAction('Editar', user.name)}>Editar</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleAction('Revogar Acesso', user.name)}>Revogar Acesso</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive" onClick={() => handleAction('Excluir', user.name)}>Excluir</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
