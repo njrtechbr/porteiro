@@ -472,11 +472,15 @@ export async function deleteUser(userId: string): Promise<boolean> {
 export async function revokeUserAccess(userId: string): Promise<boolean> {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
+      include: {
+        invitedUsers: true // Incluir usuários convidados por este usuário
+      }
     });
 
     if (!user) return false;
 
+    // Revogar acesso do usuário principal
     await prisma.user.update({
       where: { id: userId },
       data: {
@@ -485,11 +489,44 @@ export async function revokeUserAccess(userId: string): Promise<boolean> {
       }
     });
 
+    // Registrar revogação do usuário principal
     await addLogEntry({
       userId: '1', // Admin User
       action: 'Acesso Revogado',
       details: `Acesso de ${user.name} foi revogado.`,
     });
+
+    // Se o usuário convidou outros (hóspede com convidados), revogar acesso dos convidados também
+    if (user.invitedUsers && user.invitedUsers.length > 0) {
+      console.log(`[revokeUserAccess] Revogando acesso de ${user.invitedUsers.length} convidados de ${user.name}`);
+      
+      // Revogar acesso de todos os convidados
+      const revokedGuestIds = user.invitedUsers.map(guest => guest.id);
+      
+      await prisma.user.updateMany({
+        where: {
+          id: { in: revokedGuestIds },
+          status: { not: UserStatus.expirado } // Apenas revogar se ainda não estiver expirado
+        },
+        data: {
+          status: UserStatus.expirado,
+          accessEnd: new Date()
+        }
+      });
+
+      // Registrar revogação de cada convidado
+      for (const guest of user.invitedUsers) {
+        if (guest.status !== UserStatus.expirado) {
+          await addLogEntry({
+            userId: '1', // Admin User
+            action: 'Acesso Revogado (Cascata)',
+            details: `Acesso de ${guest.name} foi revogado automaticamente devido à revogação do hóspede ${user.name}.`,
+          });
+        }
+      }
+
+      console.log(`[revokeUserAccess] Acesso revogado para ${user.invitedUsers.filter(g => g.status !== UserStatus.expirado).length} convidados`);
+    }
 
     revalidatePath('/dashboard/users');
     return true;

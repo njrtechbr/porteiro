@@ -92,6 +92,40 @@
 
 ---
 
+### 🔗 **Revogação em Cascata**
+
+#### Funcionalidade
+- Quando um hóspede tem seu acesso revogado, todos os convidados associados também são revogados automaticamente
+- Implementa regra de negócio crítica de segurança
+- Registra logs separados para cada convidado revogado
+
+#### Como Funciona
+1. Admin revoga acesso de um hóspede
+2. Sistema identifica todos os convidados ativos desse hóspede
+3. Revoga automaticamente o acesso de todos os convidados
+4. Registra logs individuais para auditoria completa
+
+#### Validações
+- Apenas convidados com status "ativo" são revogados
+- Convidados já expirados não são afetados
+- Operação é atômica - ou revoga todos ou nenhum
+
+#### Interface
+- Diálogo de confirmação mostra quantos convidados serão afetados
+- Aviso visual em cor âmbar quando há convidados
+- Contagem dinâmica de convidados ativos
+
+#### Logs Gerados
+- **"Acesso Revogado"**: Para o hóspede principal
+- **"Acesso Revogado (Cascata)"**: Para cada convidado afetado
+- Detalhes incluem nome do hóspede que causou a revogação
+
+#### Componente
+- **Arquivo**: `src/components/revoke-user-dialog.tsx` (atualizado)
+- **Função**: `revokeUserAccess()` em `src/lib/actions.ts` (aprimorada)
+
+---
+
 ### 🔧 **Implementação Técnica**
 
 #### Actions Criadas

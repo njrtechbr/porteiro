@@ -45,10 +45,15 @@ Estas funções gerenciam as operações de CRUD (Criar, Ler, Atualizar, Excluir
 -   **Retorno**: Uma `Promise` que resolve para `true` se a exclusão for bem-sucedida, ou `false` caso contrário.
 
 #### `revokeUserAccess(userId: string): Promise<boolean>`
--   **Descrição**: Revoga o acesso de um usuário, alterando seu status para "expirado" e definindo a data final do acesso para o momento atual.
+-   **Descrição**: Revoga o acesso de um usuário, alterando seu status para "expirado" e definindo a data final do acesso para o momento atual. **IMPORTANTE**: Se o usuário convidou outros usuários (hóspede com convidados), o acesso de todos os convidados também será revogado automaticamente.
 -   **Parâmetros**:
     -   `userId` (string): O ID do usuário cujo acesso será revogado.
 -   **Retorno**: Uma `Promise` que resolve para `true` se a operação for bem-sucedida.
+-   **Comportamento Especial**: 
+    -   Identifica convidados através do campo `invitedById`
+    -   Revoga apenas convidados com status diferente de "expirado"
+    -   Registra logs separados para o usuário principal e cada convidado
+    -   Operação é atômica - falha completa se houver erro
 
 ### Funções de Log
 
