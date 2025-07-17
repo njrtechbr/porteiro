@@ -6,28 +6,143 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
-import { Copy, Link as LinkIcon, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { Copy, Link as LinkIcon, Loader2, FileText, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
+import { TosGenerator } from '@/components/tos-generator';
+import { SettingsHelper } from '@/lib/settings';
 
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'success' | 'error' | 'untested'>('untested');
+  
+  // Estados para configurações
+  const [propertyName, setPropertyName] = useState('');
+  const [propertyAddress, setPropertyAddress] = useState('');
+  const [termoUso, setTermoUso] = useState('');
+  const [welcomeMessage, setWelcomeMessage] = useState('');
+  const [haUrl, setHaUrl] = useState('');
+  const [haToken, setHaToken] = useState('');
+  const [gateNicaraguaEntity, setGateNicaraguaEntity] = useState('');
+  const [gateBelgicaEntity, setGateBelgicaEntity] = useState('');
+  
+  // Estados de loading
+  const [isSavingTermo, setIsSavingTermo] = useState(false);
+  const [showTOSGenerator, setShowTOSGenerator] = useState(false);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
-  const handleSaveChanges = (e: React.FormEvent) => {
+  // Carregar configurações existentes
+  useEffect(() => {
+    const carregarConfiguracoes = async () => {
+      setIsLoadingSettings(true);
+      try {
+        // Carregar todas as configurações em paralelo
+        const [
+          propName,
+          propAddress,
+          terms,
+          welcome,
+          url,
+          token,
+          nicaraguaEntity,
+          belgicaEntity
+        ] = await Promise.all([
+          SettingsHelper.getPropertyName(),
+          SettingsHelper.getPropertyAddress(),
+          SettingsHelper.getTermsOfService(),
+          SettingsHelper.getWelcomeMessage(),
+          SettingsHelper.getHomeAssistantUrl(),
+          SettingsHelper.getHomeAssistantToken(),
+          SettingsHelper.getGateNicaraguaEntity(),
+          SettingsHelper.getGateBelgicaEntity()
+        ]);
+
+        setPropertyName(propName);
+        setPropertyAddress(propAddress);
+        setTermoUso(terms);
+        setWelcomeMessage(welcome);
+        setHaUrl(url);
+        setHaToken(token);
+        setGateNicaraguaEntity(nicaraguaEntity);
+        setGateBelgicaEntity(belgicaEntity);
+      } catch (error) {
+        console.error('Erro ao carregar configurações:', error);
+        toast({
+          title: 'Erro ao Carregar',
+          description: 'Não foi possível carregar as configurações.',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoadingSettings(false);
+      }
+    };
+
+    carregarConfiguracoes();
+  }, []);
+
+  const handleSaveTermoUso = async () => {
+    setIsSavingTermo(true);
+    try {
+      await SettingsHelper.setTermsOfService(termoUso);
+      
+      toast({
+        title: 'Termo de Uso Salvo',
+        description: 'O termo de uso foi atualizado com sucesso.',
+      });
+    } catch (error) {
+      console.error('Erro ao salvar termo de uso:', error);
+      toast({
+        title: 'Erro ao Salvar',
+        description: 'Não foi possível salvar o termo de uso.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSavingTermo(false);
+    }
+  };
+
+  const handleTOSGenerated = (novoTermo: string) => {
+    setTermoUso(novoTermo);
+    setShowTOSGenerator(false);
+    toast({
+      title: 'Termo Gerado',
+      description: 'Um novo termo foi gerado. Revise e salve as alterações.',
+    });
+  };
+
+  const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Salvar todas as configurações em paralelo
+      await Promise.all([
+        SettingsHelper.setPropertyName(propertyName),
+        SettingsHelper.setPropertyAddress(propertyAddress),
+        SettingsHelper.setWelcomeMessage(welcomeMessage),
+        SettingsHelper.setHomeAssistantUrl(haUrl),
+        SettingsHelper.setHomeAssistantToken(haToken),
+        SettingsHelper.setGateNicaraguaEntity(gateNicaraguaEntity),
+        SettingsHelper.setGateBelgicaEntity(gateBelgicaEntity)
+      ]);
+
       toast({
         title: 'Configurações Salvas',
         description: 'Suas alterações foram salvas com sucesso.',
       });
-    }, 1500);
+    } catch (error) {
+      console.error('Erro ao salvar configurações:', error);
+      toast({
+        title: 'Erro ao Salvar',
+        description: 'Não foi possível salvar as configurações.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   const handleTestConnection = () => {
@@ -45,6 +160,15 @@ export default function SettingsPage() {
       }, 2000);
   }
 
+  if (isLoadingSettings) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Carregando configurações...</span>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSaveChanges} className="space-y-8">
       <Card>
@@ -55,11 +179,19 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="propertyName">Nome da Propriedade</Label>
-            <Input id="propertyName" defaultValue="Casa da Família Silva" />
+            <Input 
+              id="propertyName" 
+              value={propertyName}
+              onChange={(e) => setPropertyName(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="propertyAddress">Endereço</Label>
-            <Input id="propertyAddress" defaultValue="Av. Principal, 123, São Paulo, SP" />
+            <Input 
+              id="propertyAddress" 
+              value={propertyAddress}
+              onChange={(e) => setPropertyAddress(e.target.value)}
+            />
           </div>
         </CardContent>
       </Card>
@@ -88,22 +220,73 @@ export default function SettingsPage() {
             <Textarea
               id="welcomeMessage"
               rows={8}
-              defaultValue={`Olá {NOME},
-
-Você recebeu um convite de acesso para a nossa propriedade!
-
-Para garantir sua entrada, por favor, complete seu cadastro no link abaixo:
-{LINK_CADASTRO}
-
-Seu código de acesso para os portões é: {CODIGO_ACESSO}
-Portões liberados: {LISTA_PORTOES}
-
-O seu acesso estará válido de {DATA_INICIO} até {DATA_FIM}.
-
-Qualquer dúvida, estamos à disposição!`}
+              value={welcomeMessage}
+              onChange={(e) => setWelcomeMessage(e.target.value)}
             />
              <p className="text-sm text-muted-foreground">As variáveis como &#123;NOME&#125; serão substituídas automaticamente.</p>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Termo de Uso
+          </CardTitle>
+          <CardDescription>Configure o termo de uso exibido para os usuários.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="termoUso">Conteúdo do Termo de Uso</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowTOSGenerator(true)}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Gerar com IA
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleSaveTermoUso}
+                  disabled={isSavingTermo}
+                  size="sm"
+                >
+                  {isSavingTermo && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Salvar Termo
+                </Button>
+              </div>
+            </div>
+            <Textarea
+              id="termoUso"
+              value={termoUso}
+              onChange={(e) => setTermoUso(e.target.value)}
+              rows={15}
+              placeholder="Digite o termo de uso aqui..."
+            />
+            <p className="text-sm text-muted-foreground">
+              Este termo será exibido aos usuários durante o cadastro e acesso ao sistema.
+            </p>
+          </div>
+          
+          {showTOSGenerator && (
+            <div className="border rounded-lg p-4 bg-muted/50">
+              <TosGenerator onGenerated={handleTOSGenerated} />
+              <div className="mt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowTOSGenerator(false)}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -115,11 +298,22 @@ Qualquer dúvida, estamos à disposição!`}
         <CardContent className="space-y-4">
            <div className="space-y-2">
             <Label htmlFor="ha-url">URL da API</Label>
-            <Input id="ha-url" placeholder="http://homeassistant.local:8123" />
+            <Input 
+              id="ha-url" 
+              placeholder="http://homeassistant.local:8123"
+              value={haUrl}
+              onChange={(e) => setHaUrl(e.target.value)}
+            />
           </div>
            <div className="space-y-2">
             <Label htmlFor="ha-key">Chave de API (Token de Longa Duração)</Label>
-            <Input id="ha-key" type="password" placeholder="Cole sua chave de API aqui" />
+            <Input 
+              id="ha-key" 
+              type="password" 
+              placeholder="Cole sua chave de API aqui"
+              value={haToken}
+              onChange={(e) => setHaToken(e.target.value)}
+            />
           </div>
           <div className="flex items-center justify-between rounded-lg border bg-background p-3">
              <div className="flex items-center gap-2">
@@ -144,11 +338,21 @@ Qualquer dúvida, estamos à disposição!`}
         <CardContent className="space-y-4">
            <div className="space-y-2">
             <Label htmlFor="entity-nicaragua">Portão Principal (Av. Nicarágua)</Label>
-            <Input id="entity-nicaragua" placeholder="switch.portao_nicaragua" />
+            <Input 
+              id="entity-nicaragua" 
+              placeholder="switch.portao_nicaragua"
+              value={gateNicaraguaEntity}
+              onChange={(e) => setGateNicaraguaEntity(e.target.value)}
+            />
           </div>
            <div className="space-y-2">
             <Label htmlFor="entity-belgica">Portão de Serviço (Av. Bélgica)</Label>
-            <Input id="entity-belgica" placeholder="switch.portao_belgica" />
+            <Input 
+              id="entity-belgica" 
+              placeholder="switch.portao_belgica"
+              value={gateBelgicaEntity}
+              onChange={(e) => setGateBelgicaEntity(e.target.value)}
+            />
           </div>
         </CardContent>
       </Card>

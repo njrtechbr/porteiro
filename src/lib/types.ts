@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import type { User as PrismaUser, AccessLog as PrismaAccessLog, UserRole, UserStatus } from '@prisma/client';
 
 export type Gate = 'nicaragua' | 'belgica';
 
@@ -9,31 +10,16 @@ export type GateDetails = {
     description: string;
 };
 
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-  cpf: string;
-  role: 'Admin' | 'Família' | 'Hóspede' | 'Convidado';
-  accessStart: Date | null;
-  accessEnd: Date | null;
-  accessCode: string;
-  invites: number;
-  avatar: string;
-  status: 'ativo' | 'pendente' | 'expirado';
+// Tipos baseados no Prisma
+export type User = PrismaUser & {
   accessibleGates: Gate[];
 };
 
-export type UserCreation = Omit<User, 'id' | 'avatar' | 'status'>;
-export type UserUpdate = Partial<Omit<User, 'id' | 'avatar' | 'cpf'>>;
+export type UserCreation = Omit<User, 'id' | 'avatar' | 'status' | 'createdAt' | 'updatedAt'>;
+export type UserUpdate = Partial<Omit<User, 'id' | 'avatar' | 'cpf' | 'createdAt' | 'updatedAt'>>;
 
-
-export type AccessLog = {
-  id: string;
+export type AccessLog = PrismaAccessLog & {
   user: Pick<User, 'id' | 'name' | 'avatar'>;
-  action: string;
-  timestamp: Date;
-  details: string;
 };
 
 export type LogCreation = {
@@ -41,3 +27,11 @@ export type LogCreation = {
   action: string;
   details: string;
 }
+
+// Exportar os enums do Prisma
+export { UserRole, UserStatus };
+
+// Tipos para o frontend
+export type UserWithLogs = User & {
+  accessLogs: AccessLog[];
+};

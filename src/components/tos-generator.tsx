@@ -20,7 +20,11 @@ const FormSchema = z.object({
 
 type FormValues = z.infer<typeof FormSchema>;
 
-export function TosGenerator() {
+interface TosGeneratorProps {
+  onGenerated?: (terms: string) => void;
+}
+
+export function TosGenerator({ onGenerated }: TosGeneratorProps) {
   const [generatedTerms, setGeneratedTerms] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
@@ -43,6 +47,10 @@ export function TosGenerator() {
 
     if (result.success && result.terms) {
       setGeneratedTerms(result.terms);
+      // Chamar callback se fornecido
+      if (onGenerated) {
+        onGenerated(result.terms);
+      }
     } else {
       setError(result.error || 'Ocorreu um erro desconhecido.');
     }
@@ -119,6 +127,14 @@ export function TosGenerator() {
             <p className="text-muted-foreground text-center pt-4">Seus Termos de Serviço gerados aparecerão aqui.</p>
           )}
         </ScrollArea>
+        {generatedTerms && onGenerated && (
+          <Button 
+            onClick={() => onGenerated(generatedTerms)}
+            className="w-full mt-4"
+          >
+            Usar Este Termo
+          </Button>
+        )}
       </div>
     </div>
   );

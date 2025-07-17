@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enum para os papéis dos usuários
+enum UserRole {
+  Admin
+  Familia
+  Hospede
+  Convidado
+}
+
+// Enum para o status dos usuários
+enum UserStatus {
+  ativo
+  pendente
+  expirado
+}
+
+// Tabela de usuários
+model User {
+  id              String    @id @default(cuid())
+  name            String
+  email           String    @unique
+  cpf             String?   // CPF agora é opcional e não é mais UNIQUE
+  role            UserRole
+  accessStart     DateTime? @map("access_start")
+  accessEnd       DateTime? @map("access_end")
+  accessCode      String    @unique @map("access_code")
+  invites         Int       @default(0)
+  avatar          String?
+  status          UserStatus
+  accessibleGates String[]  @map("accessible_gates")
+  password        String?   // Senha do usuário (opcional, texto puro para dev)
+  invitedById     String?   // ID do usuário que convidou
+  invitedBy       User?     @relation("UserInvites", fields: [invitedById], references: [id])
+  invitedUsers    User[]    @relation("UserInvites")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relacionamento com logs de acesso
+  accessLogs AccessLog[]
+
+  @@map("users")
+}
+
+// Tabela de logs de acesso
+model AccessLog {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  action    String
+  details   String?
+  timestamp DateTime @default(now())
+
+  // Relacionamento com usuário
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("access_logs")
+}
+
+// Tabela de configurações do sistema
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String?  // JSON string para valores complexos
+  type      String   @default("string") // tipo: string, json, boolean, number
+  category  String   @default("general") // categoria: general, property, integration, etc
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}

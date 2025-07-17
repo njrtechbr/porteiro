@@ -18,20 +18,33 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    // Simulação de autenticação
-    setTimeout(() => {
-      if (email === 'admin@porteiro.com' && password === 'password') {
+    // Buscar usuário no backend pelo email
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        // Salvar token JWT no localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('porteiro_session_token', data.token);
+        }
         router.push('/dashboard');
       } else {
-        setError('E-mail ou senha inválidos.');
+        setError(data.error || 'E-mail ou senha inválidos.');
         setLoading(false);
       }
-    }, 1000);
+    } catch (err) {
+      setError('Erro ao autenticar.');
+      setLoading(false);
+    }
   };
 
   return (

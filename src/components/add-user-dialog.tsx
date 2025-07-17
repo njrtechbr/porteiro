@@ -24,7 +24,8 @@ import type { DateRange } from 'react-day-picker';
 import { Textarea } from './ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { Checkbox } from './ui/checkbox';
-import type { Gate } from '@/lib/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import type { Gate, User } from '@/lib/types';
 import { addUser } from '@/lib/actions';
 
 interface AddUserDialogProps {
@@ -33,42 +34,36 @@ interface AddUserDialogProps {
 
 export function AddUserDialog({ onUserAdded }: AddUserDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [date, setDate] = useState<DateRange | undefined>();
-  const [accessGranted, setAccessGranted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [accessGranted, setAccessGranted] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', invites: '1' });
+  const [date, setDate] = useState<DateRange | undefined>();
+  const [isPermanent, setIsPermanent] = useState(false);
   const [accessCode, setAccessCode] = useState('');
   const [accessibleGates, setAccessibleGates] = useState<Gate[]>([]);
-  const [origin, setOrigin] = useState('');
+  const [selectedRole, setSelectedRole] = useState<User['role']>('Hóspede');
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setOrigin(window.location.origin);
-    }
-  }, []);
-  
-  const registrationLink = accessCode ? `${origin}/register?code=${accessCode}`: '';
+  const whatsappMessage = `🏠 *Convite de Acesso - Sistema Porteiro*
 
-  const getGateNames = () => {
-    if (accessibleGates.length === 2) return "Portões Av. Nicarágua e Av. Bélgica";
-    if (accessibleGates.includes('nicaragua')) return "Portão Av. Nicarágua";
-    if (accessibleGates.includes('belgica')) return "Portão Av. Bélgica";
-    return "Nenhum portão";
-  }
+Olá *${formData.name}*!
 
-  const whatsappMessage = `Olá ${formData.name},
+Você foi convidado(a) para ter acesso aos portões do condomínio.
 
-Você recebeu um convite de acesso para a nossa propriedade!
+📋 *Suas informações:*
+• Nome: ${formData.name}
+• Email: ${formData.email}
+• Código de acesso: \`${accessCode}\`
+• Convites disponíveis: ${formData.invites}
 
-Para garantir sua entrada, por favor, complete seu cadastro no link abaixo:
-${registrationLink}
+🔗 *Para finalizar seu cadastro, acesse:*
+${typeof window !== 'undefined' ? window.location.origin : ''}/register?code=${accessCode}
 
-Seu código de acesso para os portões é: ${accessCode}
-Portões liberados: ${getGateNames()}
+⚠️ *Importante:*
+• Complete o cadastro com CPF e senha
+• Guarde bem suas credenciais de acesso
+• Em caso de dúvidas, entre em contato
 
-O seu acesso estará válido de ${date?.from ? format(date.from, 'dd/MM/yyyy') : ''} até ${date?.to ? format(date.to, 'dd/MM/yyyy') : ''}.
-
-Qualquer dúvida, estamos à disposição!`;
+Bem-vindo(a)! 🎉`;
 
   const handleGrantAccess = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,11 +73,34 @@ Qualquer dúvida, estamos à disposição!`;
     const email = (form.elements.namedItem('email') as HTMLInputElement).value;
     const invites = (form.elements.namedItem('invites') as HTMLInputElement).value;
 
-    if (!name || !email || !invites || !date?.from || !date?.to || accessibleGates.length === 0) {
+    // Validação condicional baseada no tipo de acesso
+    if (!name || !email || !invites) {
+        toast({
+            variant: "destructive",
+            title: "Erro de Validação", 
+            description: "Por favor, preencha todos os campos obrigatórios.",
+        });
+        setIsLoading(false);
+        return;
+    }
+
+    // Se não é permanente, deve ter período definido
+    if (!isPermanent && (!date?.from || !date?.to)) {
         toast({
             variant: "destructive",
             title: "Erro de Validação",
-            description: "Por favor, preencha todos os campos, selecione um período e ao menos um portão de acesso.",
+            description: "Por favor, selecione um período de acesso ou marque 'Acesso Permanente'.",
+        });
+        setIsLoading(false);
+        return;
+    }
+
+    // Deve ter pelo menos um portão selecionado
+    if (accessibleGates.length === 0) {
+        toast({
+            variant: "destructive",
+            title: "Erro de Validação",
+            description: "Por favor, selecione ao menos um portão de acesso.",
         });
         setIsLoading(false);
         return;
@@ -92,10 +110,10 @@ Qualquer dúvida, estamos à disposição!`;
       const newUser = await addUser({
         name,
         email,
-        cpf: '', // CPF can be collected on registration
-        role: 'Hóspede',
-        accessStart: date.from,
-        accessEnd: date.to,
+        cpf: '', // CPF será coletado no registro
+        role: selectedRole,
+        accessStart: isPermanent ? null : date?.from || null,
+        accessEnd: isPermanent ? null : date?.to || null,
         accessCode: accessCode,
         invites: parseInt(invites, 10),
         accessibleGates: accessibleGates,
@@ -137,12 +155,26 @@ Qualquer dúvida, estamos à disposição!`;
     );
   }
 
+  const handlePermanentChange = (checked: boolean) => {
+    setIsPermanent(checked);
+    if (checked) {
+      setDate(undefined);
+    } else {
+      // Definir um período padrão de uma semana
+      const today = new Date();
+      const nextWeek = new Date(new Date().setDate(today.getDate() + 7));
+      setDate({ from: today, to: nextWeek });
+    }
+  }
+
   const resetState = () => {
     setAccessGranted(false);
     setFormData({ name: '', email: '', invites: '1' });
     setDate(undefined);
     setAccessCode('');
     setAccessibleGates([]);
+    setSelectedRole('Hóspede');
+    setIsPermanent(false);
   }
 
   const handleOpenChange = (open: boolean) => {
@@ -168,7 +200,7 @@ Qualquer dúvida, estamos à disposição!`;
             <DialogHeader>
               <DialogTitle className="font-headline">Adicionar Novo Acesso</DialogTitle>
               <DialogDescription>
-                Preencha os dados abaixo para conceder acesso a um novo hóspede.
+                Preencha os dados abaixo para conceder acesso a um novo usuário.
               </DialogDescription>
             </DialogHeader>
             <form id="addUserForm" onSubmit={handleGrantAccess}>
@@ -185,6 +217,24 @@ Qualquer dúvida, estamos à disposição!`;
                     </Label>
                     <Input id="email" name="email" type="email" placeholder="joao.silva@email.com" className="col-span-3" required/>
                 </div>
+
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="role" className="text-right">
+                    Função
+                  </Label>
+                  <Select value={selectedRole} onValueChange={setSelectedRole}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Selecione uma função" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Hóspede">Hóspede</SelectItem>
+                      <SelectItem value="Família">Família</SelectItem>
+                      <SelectItem value="Convidado">Convidado</SelectItem>
+                      <SelectItem value="Admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="accessCode" className="text-right">
                         Cód. de Acesso
@@ -197,45 +247,58 @@ Qualquer dúvida, estamos à disposição!`;
                     </Label>
                     <Input id="invites" name="invites" type="number" defaultValue="1" min="0" className="col-span-3" required/>
                 </div>
+
                 <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Período</Label>
+                  <Label className="text-right">Período</Label>
+                  <div className="col-span-3 space-y-2">
                     <Popover>
-                    <PopoverTrigger asChild>
+                      <PopoverTrigger asChild>
                         <Button
-                        id="date"
-                        variant={'outline'}
-                        className={cn(
-                            'w-full justify-start text-left font-normal col-span-3',
+                          id="date"
+                          variant={'outline'}
+                          className={cn(
+                            'w-full justify-start text-left font-normal',
                             !date && 'text-muted-foreground'
-                        )}
+                          )}
+                          disabled={isPermanent}
                         >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date?.from ? (
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {date?.from ? (
                             date.to ? (
-                            <>
+                              <>
                                 {format(date.from, 'dd/MM/yy')} - {format(date.to, 'dd/MM/yy')}
-                            </>
+                              </>
                             ) : (
-                            format(date.from, 'LLL dd, y', { locale: ptBR })
+                              format(date.from, 'LLL dd, y', { locale: ptBR })
                             )
-                        ) : (
+                          ) : (
                             <span>Escolha um período</span>
-                        )}
+                          )}
                         </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
-                        initialFocus
-                        mode="range"
-                        defaultMonth={date?.from}
-                        selected={date}
-                        onSelect={setDate}
-                        numberOfMonths={2}
-                        locale={ptBR}
+                          initialFocus
+                          mode="range"
+                          defaultMonth={date?.from}
+                          selected={date}
+                          onSelect={setDate}
+                          numberOfMonths={2}
+                          locale={ptBR}
                         />
-                    </PopoverContent>
+                      </PopoverContent>
                     </Popover>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="permanent" 
+                        checked={isPermanent}
+                        onCheckedChange={handlePermanentChange}
+                      />
+                      <Label htmlFor="permanent" className="font-normal">Acesso Permanente</Label>
+                    </div>
+                  </div>
                 </div>
+
                 <div className="grid grid-cols-4 items-start gap-4">
                   <Label className="text-right pt-2">Portões</Label>
                   <div className="col-span-3 space-y-2">
@@ -248,7 +311,7 @@ Qualquer dúvida, estamos à disposição!`;
                     </div>
                      <div className="flex items-center space-x-2">
                       <Checkbox 
-                        id="gate-belgica" 
+                        id="gate-belgica"
                         onCheckedChange={(checked) => handleGateChange('belgica', !!checked)}
                       />
                       <Label htmlFor="gate-belgica" className="font-normal">Av. Bélgica</Label>
@@ -256,13 +319,13 @@ Qualquer dúvida, estamos à disposição!`;
                   </div>
                 </div>
               </div>
+              <DialogFooter>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Conceder Acesso
+                </Button>
+              </DialogFooter>
             </form>
-            <DialogFooter>
-              <Button type="submit" form="addUserForm" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Conceder Acesso
-              </Button>
-            </DialogFooter>
           </>
         ) : (
           <>

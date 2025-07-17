@@ -6,6 +6,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { LayoutDashboard, Users, ClipboardList, Settings, LogOut } from 'lucide-react';
 import { GateIcon } from './gate-icon';
 import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
+import { logout } from '@/lib/jwt-utils';
 
 const navItems = [
   { href: '/dashboard', label: 'Painel', icon: LayoutDashboard, exact: true },
@@ -16,6 +18,11 @@ const navItems = [
 
 export function DashboardSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const handleLogout = () => {
+    logout();
+    router.push('/');
+  };
 
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
@@ -53,13 +60,13 @@ export function DashboardSidebar() {
         <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Link
-                href="/"
+              <button
+                onClick={handleLogout}
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
               >
                 <LogOut className="h-5 w-5" />
                 <span className="sr-only">Sair</span>
-              </Link>
+              </button>
             </TooltipTrigger>
             <TooltipContent side="right">Sair</TooltipContent>
           </Tooltip>

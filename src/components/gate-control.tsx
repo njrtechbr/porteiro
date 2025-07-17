@@ -5,22 +5,49 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { getCurrentUserId, getCurrentUserRole } from '@/lib/jwt-utils';
 
 type Gate = 'nicaragua' | 'belgica';
 
 export function GateControl() {
   const [loadingGate, setLoadingGate] = useState<Gate | null>(null);
 
-  const handleGateAction = (gate: Gate, gateName: string) => {
+  const handleGateAction = async (gate: Gate, gateName: string) => {
     setLoadingGate(gate);
 
-    setTimeout(() => {
+    try {
+      // Verificar se é um admin autenticado
+      const userId = getCurrentUserId();
+      const userRole = getCurrentUserRole();
+      
+      if (!userId || userRole !== 'Admin') {
+        throw new Error('Apenas administradores podem acionar o portão.');
+      }
+      
+      // Simular acionamento do portão (aqui seria a integração real com Home Assistant)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Registrar o acionamento no log
+      const { addLogEntry } = await import('@/lib/actions');
+      await addLogEntry({
+        userId: adminUserId,
+        action: 'Portão Acionado',
+        details: `Acionamento via Dashboard Admin (${gateName})`,
+      });
+      
       setLoadingGate(null);
       toast({
         title: 'Portão Acionado',
         description: `O portão da ${gateName} foi acionado com sucesso.`,
       });
-    }, 1500);
+    } catch (error) {
+      setLoadingGate(null);
+      toast({
+        variant: 'destructive',
+        title: 'Erro no Acionamento',
+        description: (error as Error).message || 'Não foi possível acionar o portão.',
+      });
+    }
   };
 
   return (

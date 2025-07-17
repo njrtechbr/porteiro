@@ -1,2 +1,5 @@
 import '@/ai/flows/generate-terms-of-service';
-export {GET, POST} from 'genkit/next';
+import { appRoute } from '@genkit-ai/next';
+
+export const GET = appRoute;
+export const POST = appRoute;

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Copy } from 'lucide-react';
 import { getAllUsers, updateUser, deleteUser, revokeUserAccess } from '@/lib/actions';
 import type { User, UserUpdate } from '@/lib/types';
 import { format } from 'date-fns';
@@ -14,6 +14,8 @@ import { AddUserDialog } from '@/components/add-user-dialog';
 import { EditUserDialog } from '@/components/edit-user-dialog';
 import { RevokeUserDialog } from '@/components/revoke-user-dialog';
 import { DeleteUserDialog } from '@/components/delete-user-dialog';
+import { ReactivateUserDialog } from '@/components/reactivate-user-dialog';
+import { ChangePasswordDialog } from '@/components/change-password-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 
@@ -70,6 +72,13 @@ export default function UsersPage() {
     setIsDeleteDialogOpen(true);
   };
 
+  const handleCopyInviteLink = (user: User) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const link = `${origin}/register?code=${user.accessCode}`;
+    navigator.clipboard.writeText(link);
+    toast({ title: 'Link copiado!', description: 'O link de cadastro foi copiado para a área de transferência.' });
+  };
+
   const onUserUpdate = async (userId: string, data: UserUpdate) => {
     const updatedUser = await updateUser(userId, data);
     if (updatedUser) {
@@ -108,6 +117,13 @@ export default function UsersPage() {
     toast({ title: 'Sucesso', description: 'Usuário adicionado com sucesso.' });
   }
 
+  // Buscar todos os usuários que convidaram outros (para exibir na tabela)
+  const usersById = useMemo(() => {
+    const map: Record<string, User> = {};
+    users.forEach(u => { map[u.id] = u; });
+    return map;
+  }, [users]);
+
   return (
     <>
       <Card>
@@ -124,6 +140,10 @@ export default function UsersPage() {
               <TableRow>
                 <TableHead>Usuário</TableHead>
                 <TableHead>Função</TableHead>
+                <TableHead>CPF</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Convidado por</TableHead>
+                <TableHead>Convites Restantes</TableHead>
                 <TableHead className="hidden md:table-cell">Período de Acesso</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>
@@ -151,7 +171,9 @@ export default function UsersPage() {
                   </TableRow>
                 ))
               ) : (
-                users.map((user) => (
+                users.map((user) => {
+                  const inviter = user.invitedById ? usersById[user.invitedById] : null;
+                  return (
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -161,11 +183,22 @@ export default function UsersPage() {
                         </Avatar>
                         <div>
                           <div className="font-medium">{user.name}</div>
-                          <div className="hidden text-sm text-muted-foreground md:inline">{user.email}</div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>{user.role}</TableCell>
+                    <TableCell>{user.cpf || '-'}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      {inviter ? (
+                        <span title={inviter.email}>{inviter.name} <span className="text-xs text-muted-foreground">({inviter.role})</span></span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {user.role === 'Hospede' ? user.invites : '-'}
+                    </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {user.accessStart && user.accessEnd
                         ? `${format(user.accessStart, 'dd/MM/yyyy')} - ${format(user.accessEnd, 'dd/MM/yyyy')}`
@@ -185,13 +218,28 @@ export default function UsersPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Ações</DropdownMenuLabel>
                           <DropdownMenuItem onClick={() => handleEdit(user)}>Editar</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleRevoke(user)}>Revogar Acesso</DropdownMenuItem>
+                          {user.status === 'expirado' && (
+                            <div className="px-2 py-1.5">
+                              <ReactivateUserDialog user={user} onUserReactivated={fetchUsers} />
+                            </div>
+                          )}
+                          <div className="px-2 py-1.5">
+                            <ChangePasswordDialog user={user} onPasswordChanged={fetchUsers} />
+                          </div>
+                          {user.status !== 'expirado' && (
+                            <DropdownMenuItem onClick={() => handleRevoke(user)}>Revogar Acesso</DropdownMenuItem>
+                          )}
                           <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(user)}>Excluir</DropdownMenuItem>
+                          {user.status === 'pendente' && (
+                            <DropdownMenuItem onClick={() => handleCopyInviteLink(user)}>
+                              <Copy className="mr-2 h-4 w-4" /> Copiar link de cadastro
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))
+                )})
               )}
             </TableBody>
           </Table>

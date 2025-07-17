@@ -11,6 +11,8 @@ import { format, isFuture, isPast } from "date-fns";
 import { KeyRound, CalendarClock } from "lucide-react";
 import { GuestInviteCard } from "@/components/guest-invite-card";
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRouter } from 'next/navigation';
+import { getCurrentUserId, getCurrentUserRole, isUserLoggedIn } from '@/lib/jwt-utils';
 
 function UserAccessList({ title, users, icon: Icon, loading }: { title: string; users: User[]; icon: React.ElementType, loading: boolean }) {
   return (
@@ -62,20 +64,51 @@ function UserAccessList({ title, users, icon: Icon, loading }: { title: string; 
 export default function DashboardPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchUsers() {
+      // Verificar se há usuário logado com JWT válido
+      if (!isUserLoggedIn()) {
+        setError('Você precisa estar autenticado para acessar o painel.');
+        setLoading(false);
+        setTimeout(() => router.push('/'), 1500);
+        return;
+      }
+
+      // Verificar se é admin pelo JWT
+      const userRole = getCurrentUserRole();
+      if (userRole !== 'Admin') {
+        setError('Apenas administradores podem acessar o painel.');
+        setLoading(false);
+        setTimeout(() => router.push('/'), 2000);
+        return;
+      }
+
       try {
         const fetchedUsers = await getAllUsers();
         setUsers(fetchedUsers);
       } catch (err) {
-        console.error("Failed to fetch users:", err);
+        setError('Falha ao carregar usuários.');
       } finally {
         setLoading(false);
       }
     }
     fetchUsers();
-  }, []);
+  }, [router]);
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Acesso Negado</h2>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <a href="/" className="text-primary underline">Fazer login</a>
+        </div>
+      </div>
+    );
+  }
 
   const currentUser = users.find(u => u.role === 'Hóspede'); 
 
