@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # Banco de dados PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: porteiro-db
+    restart: unless-stopped
+    environment:
+      # Valores FIXOS - sem variáveis
+      POSTGRES_DB: porteirob
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ce6058ff4ec39df4eb327a2409af72b6
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data_fixed:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d porteirob"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - porteiro-network
+
+  # Aplicação Next.js
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: porteiro-app
+    restart: unless-stopped
+    environment:
+      # DATABASE_URL corrigida - apontando para container 'postgres'
+      DATABASE_URL: "postgresql://postgres:ce6058ff4ec39df4eb327a2409af72b6@postgres:5432/porteirob"
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      
+      # JWT e Auth - valores fixos
+      JWT_SECRET: "a8b1c3d5e7f9a2b4c6d8e1f3a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e1f3a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e1f3a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e1f3a5b7c9d2e4f6a8b1"
+      NEXTAUTH_SECRET: "ZTg5YjFjM2Q0ZTZmOGE3YjljMGUyZjRhNmI4YzFlMmQzYjVlNmY4YTJiNGM2ZDhlMWYzYTViN2M5ZDJlNGY2YTgxYjNjZDVlNmY4YTJiNGM2ZDhlMWYzYTViN2M5ZDJlNGY2YTgxYjNjZDVlNmY4YTJiNGM2ZDhlMWYzYTViN2M5ZDJlNGY="
+      NEXTAUTH_URL: "https://portaria.nereujr.com.br"
+      
+      # Next.js
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      
+      # Seed inicial
+      RUN_SEED: "true"
+      
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - app_uploads:/app/uploads
+    networks:
+      - porteiro-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+
+  # Redis para cache
+  redis:
+    image: redis:7-alpine
+    container_name: porteiro-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass c22fc105ab0a0d8a763faa7bbd106143
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - porteiro-network
+
+volumes:
+  postgres_data_fixed:
+    driver: local
+  redis_data:
+    driver: local
+  app_uploads:
+    driver: local
+
+networks:
+  porteiro-network:
+    driver: bridge

@@ -10,27 +10,23 @@ wait_for_db() {
     echo "Banco de dados disponível!"
 }
 
-# Instalar netcat se não estiver disponível
-if ! command -v nc &> /dev/null; then
-    echo "Instalando netcat..."
-    apk add --no-cache netcat-openbsd
-fi
+# Netcat já está instalado no Dockerfile
 
 # Aguardar o banco de dados
 wait_for_db
 
-# Aplicar migrações do Prisma
+# Aplicar migrações do Prisma usando caminho absoluto
 echo "Aplicando migrações do banco de dados..."
-npx prisma migrate deploy
+./node_modules/.bin/prisma migrate deploy
 
 # Gerar cliente Prisma
 echo "Gerando cliente Prisma..."
-npx prisma generate
+./node_modules/.bin/prisma generate
 
 # Executar seed se a variável estiver definida
 if [ "$RUN_SEED" = "true" ]; then
     echo "Executando seed do banco de dados..."
-    npx prisma db seed || echo "Seed falhou ou já foi executado"
+    ./node_modules/.bin/tsx prisma/seed.ts || echo "Seed falhou ou já foi executado"
 fi
 
 # Iniciar aplicação

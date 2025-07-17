@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # Banco de dados PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: porteiro-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: porteirob
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d porteirob"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - porteiro-network
+
+  # Aplicação Next.js
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: porteiro-app
+    restart: unless-stopped
+    environment:
+      # String de conexão explícita (SEM variáveis)
+      DATABASE_URL: "postgresql://postgres:postgres123@postgres:5432/porteirob"
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      
+      # JWT e Auth (valores diretos)
+      JWT_SECRET: "8f2a9b4c6d8e1f3a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e1f3a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e1f3a5b7c9d2e"
+      NEXTAUTH_SECRET: "eW2BvZH8FXiQ5uz1MRoPb8nujHCYuKOQFNQE1A8eBslpsZ5AT8wfegWjoxNXLy+sxGacjCfxGQE6IqVjSDv4MQ=="
+      NEXTAUTH_URL: "http://localhost:3000"
+      
+      # Next.js
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      
+      # Seed inicial
+      RUN_SEED: "true"
+      
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - app_uploads:/app/uploads
+    networks:
+      - porteiro-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis para cache
+  redis:
+    image: redis:7-alpine
+    container_name: porteiro-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass redis123
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - porteiro-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  app_uploads:
+    driver: local
+
+networks:
+  porteiro-network:
+    driver: bridge 

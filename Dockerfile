@@ -28,7 +28,7 @@ FROM node:18-alpine AS runner
 WORKDIR /app
 
 # Instalar ferramentas necessárias para produção
-RUN apk add --no-cache curl wget
+RUN apk add --no-cache curl wget netcat-openbsd
 
 # Criar usuário não-root
 RUN addgroup --system --gid 1001 nodejs
@@ -41,10 +41,12 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/package.json ./package.json
 
-# Copiar node_modules apenas do Prisma e dependências necessárias
+# Copiar node_modules do Prisma, tsx e dependências necessárias (incluindo CLI)
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder /app/node_modules/tsx ./node_modules/tsx
+COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
 
 # Script de inicialização
 COPY docker-entrypoint.sh ./

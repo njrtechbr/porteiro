@@ -4,21 +4,32 @@ services:
   # Banco de dados PostgreSQL
   postgres:
     image: postgres:15-alpine
-    container_name: porteiro-db
+    container_name: porteiro-db-prod
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-porteirob}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: porteirob
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ce6058ff4ec39df4eb327a2409af72b6
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_prod:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-porteirob}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d porteirob"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
+    networks:
+      - porteiro-network
+
+  # Redis para cache
+  redis:
+    image: redis:7-alpine
+    container_name: porteiro-redis-prod
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass c22fc105ab0a0d8a763faa7bbd106143
+    volumes:
+      - redis_data_prod:/data
     networks:
       - porteiro-network
 
@@ -27,47 +38,52 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: porteiro-app
+    container_name: porteiro-app-prod
     restart: unless-stopped
     environment:
       # Banco de dados
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-porteirob}
+      DATABASE_URL: postgresql://postgres:ce6058ff4ec39df4eb327a2409af72b6@postgres:5432/porteirob
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       
+      # Redis
+      REDIS_PASSWORD: c22fc105ab0a0d8a763faa7bbd106143
+      
       # JWT e Auth
-      JWT_SECRET: ${JWT_SECRET}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      JWT_SECRET: 8f2a9b4c6d8e1f3a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e1f3a5b7c9d2e4f6a8b1c3d5e7f9a2b4c6d8e1f3a5b7c9d2e
+      NEXTAUTH_SECRET: eW2BvZH8FXiQ5uz1MRoPb8nujHCYuKOQFNQE1A8eBslpsZ5AT8wfegWjoxNXLy+sxGacjCfxGQE6IqVjSDv4MQ==
+      NEXTAUTH_URL: https://portaria.nereujr.com.br
       
       # Next.js
       NODE_ENV: production
       PORT: 3000
       HOSTNAME: 0.0.0.0
       
-      # Configurações opcionais
-      RUN_SEED: ${RUN_SEED:-false}
+      # Configurações
+      RUN_SEED: false
       
     ports:
-      - "${APP_PORT:-3000}:3000"
+      - "3000:3000"
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
-      - app_uploads:/app/uploads
+      - app_uploads_prod:/app/uploads
     networks:
       - porteiro-network
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
       interval: 30s
-      timeout: 10s
+      timeout: 90s
       retries: 3
-      start_period: 40s
+      start_period: 120s
 
 volumes:
-  postgres_data:
+  postgres_data_prod:
     driver: local
-  app_uploads:
+  redis_data_prod:
+    driver: local
+  app_uploads_prod:
     driver: local
 
 networks:
