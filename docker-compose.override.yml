@@ -1,0 +1,26 @@
+# Override para desenvolvimento local
+version: '3.8'
+
+services:
+  app:
+    build:
+      target: builder
+    environment:
+      NODE_ENV: development
+      RUN_SEED: true
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+
+  postgres:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+
+  # Desabilitar nginx em desenvolvimento
+  nginx:
+    profiles:
+      - production 

@@ -25,6 +25,22 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Configuração para Docker
+  output: 'standalone',
+  // Configurar para aceitar requisições de qualquer host
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default withPWA(nextConfig);
