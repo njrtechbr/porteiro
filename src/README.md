@@ -102,17 +102,17 @@ Para iniciar o servidor de desenvolvimento, execute:
 ```bash
 npm run dev
 ```
-A aplicação estará disponível em `http://localhost:9002`.
+A aplicação estará disponível em `http://localhost:3000`.
 
 ### Credenciais de Acesso (Simuladas)
 
 - **Painel do Administrador**:
-  - **URL**: `http://localhost:9002/`
+  - **URL**: `http://localhost:3000/`
   - **Email**: `admin@porteiro.com`
   - **Senha**: `password`
 
 - **Acesso de Convidado**:
-  - **URL**: `http://localhost:9002/access`
+  - **URL**: `http://localhost:3000/access`
   - A página carrega automaticamente os dados do usuário "Alice Joana (Hóspede)" para fins de desenvolvimento.
   - No celular, acesse a URL, abra as opções do navegador e selecione "Adicionar à tela de início" ou "Instalar aplicativo" para testar a funcionalidade PWA.
 ```

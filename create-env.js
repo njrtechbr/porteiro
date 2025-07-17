@@ -12,7 +12,7 @@ GOOGLE_GENAI_API_KEY="sua-chave-google-ai"
 
 # Next.js
 NEXTAUTH_SECRET="seu-secret-nextauth"
-NEXTAUTH_URL="http://localhost:9002"
+NEXTAUTH_URL="http://localhost:3000"
 
 # Home Assistant (opcional)
 HOME_ASSISTANT_URL="http://seu-home-assistant:8123"
@@ -29,7 +29,7 @@ try {
   console.log('');
   console.log('🎯 Próximos passos:');
   console.log('1. Execute: npm run dev');
-  console.log('2. Acesse: http://localhost:9002/access');
+  console.log('2. Acesse: http://localhost:3000/access');
   console.log('3. Faça login com: admin@admin.com / password');
   console.log('4. Ou use: teste@expirado.com / 123456');
 } catch (error) {

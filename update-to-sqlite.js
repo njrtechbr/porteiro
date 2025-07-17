@@ -12,7 +12,7 @@ GOOGLE_GENAI_API_KEY="sua-chave-google-ai"
 
 # Next.js
 NEXTAUTH_SECRET="seu-secret-nextauth"
-NEXTAUTH_URL="http://localhost:9002"
+NEXTAUTH_URL="http://localhost:3000"
 
 # Home Assistant (opcional)
 HOME_ASSISTANT_URL="http://seu-home-assistant:8123"

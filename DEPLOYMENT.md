@@ -90,7 +90,7 @@ sudo ufw enable
 sudo ufw allow ssh
 sudo ufw allow 80
 sudo ufw allow 443
-sudo ufw deny 9002  # Bloquear porta direta da aplicação
+sudo ufw deny 3000  # Bloquear porta direta da aplicação
 ```
 
 ### 3. Configuração do Nginx
@@ -121,7 +121,7 @@ server {
     limit_req zone=api burst=20 nodelay;
 
     location / {
-        proxy_pass http://localhost:9002;
+        proxy_pass http://localhost:3000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -177,7 +177,7 @@ module.exports = {
     exec_mode: 'cluster',
     env: {
       NODE_ENV: 'production',
-      PORT: 9002
+      PORT: 3000
     },
     error_file: '/var/log/porteiro/error.log',
     out_file: '/var/log/porteiro/out.log',
@@ -273,7 +273,7 @@ pm2 start porteiro-prod
 # /scripts/health-check.sh
 
 # Verificar aplicação
-curl -f http://localhost:9002/ || echo "App DOWN"
+curl -f http://localhost:3000/ || echo "App DOWN"
 
 # Verificar banco
 pg_isready -U porteiro_user -h localhost -d porteiro_prod || echo "DB DOWN"

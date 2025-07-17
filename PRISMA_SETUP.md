@@ -26,7 +26,7 @@ JWT_SECRET="sua-chave-jwt-512-bits-super-secreta-para-assinatura-de-tokens-jwt-p
 
 # Next.js Authentication
 NEXTAUTH_SECRET="seu-secret-nextauth-diferente-do-jwt"
-NEXTAUTH_URL="http://localhost:9002"
+NEXTAUTH_URL="http://localhost:3000"
 
 # AI Integration (Opcional)
 GOOGLE_GENAI_API_KEY="sua-chave-google-ai-para-geracao-de-termos"
