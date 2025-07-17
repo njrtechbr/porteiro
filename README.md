@@ -106,17 +106,17 @@ npm install
 
 ### 3. Configuração do Banco
 ```bash
-# Criar banco PostgreSQL
-createdb porteiro
-
 # Configurar .env (veja PRISMA_SETUP.md)
 cp .env.example .env
 
-# Executar migrações
-npm run db:migrate
+# Gerar cliente Prisma
+npx prisma generate
+
+# Executar migrações do banco
+npx prisma migrate deploy
 
 # Popular dados iniciais
-npm run db:seed
+npx prisma db seed
 ```
 
 ### 4. Executar Aplicação
